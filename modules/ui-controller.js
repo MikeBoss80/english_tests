@@ -283,9 +283,8 @@ export class UIController {
                     ${isLast
                         ? `<button class="btn btn-primary" id="review-btn">Review & Submit ✓</button>`
                         : `<button class="btn btn-primary" id="next-btn">Next →</button>`}
+                    <button class="btn btn-ghost btn-submit" id="submit-early-btn">Submit Assessment</button>
                 </div>
-
-                <button class="btn btn-ghost btn-submit" id="submit-early-btn">Submit Assessment</button>
             </div>
         `;
 

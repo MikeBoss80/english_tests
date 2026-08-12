@@ -1000,6 +1000,13 @@ body::before {
     min-width: 120px;
 }
 
+/* Submit Assessment ocupa su propia fila debajo de Previous/Next */
+.nav-actions-question .btn-submit {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+}
+
 /* ============================================================
    Confirm Screen - Mejorada
    ============================================================ */
@@ -1899,7 +1906,7 @@ li.muted {
         justify-content: center;
     }
 
-    /* Barra de navegación fija (móvil): Previous izq + Next/Review der */
+    /* Barra de navegación fija (móvil): Previous izq + Next/Review der, Submit debajo */
     .nav-actions-question {
         position: fixed;
         left: 0;
@@ -1907,7 +1914,7 @@ li.muted {
         bottom: 0;
         z-index: 100;
         flex-direction: row;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         justify-content: flex-start;
         align-items: center;
         gap: 12px;
@@ -1934,8 +1941,19 @@ li.muted {
         flex: 1;
     }
 
+    .nav-actions-question .btn-submit {
+        flex: 1 1 100%;
+        width: 100%;
+        margin-top: 0;
+    }
+
     .question-container {
-        padding-bottom: 92px;
+        padding-bottom: 148px;
+        animation: none;
+    }
+
+    .question-content {
+        animation: fadeSlideUp 0.4s ease;
     }
 
     .rec-item p {
