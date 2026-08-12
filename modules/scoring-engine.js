@@ -66,13 +66,17 @@ export class ScoringEngine {
             results.overall = Math.round((results.totalCorrect / results.totalQuestions) * 100);
         }
 
-        // Detalle por pregunta (para tabla final)
+        // Detalle por pregunta (para tabla final / revisión)
         results.details = this.questions.map(q => ({
             id: q.id,
             section: q.section,
             topic: q.topic,
             type: q.type,
             question: q.question,
+            options: q.options || null,
+            pairs: q.pairs || null,
+            answer: q.answer,
+            given: this.answers[q.id],
             explanation: q.explanation,
             correct: this.isCorrect(q)
         }));

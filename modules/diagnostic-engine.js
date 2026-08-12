@@ -84,10 +84,10 @@ export class DiagnosticEngine {
     }
 
     getTopicStatus(percentage) {
-        if (percentage >= 80) return { key: 'strong', label: 'Strong', emoji: '🟢' };
-        if (percentage >= 60) return { key: 'developing', label: 'Developing', emoji: '🟡' };
-        if (percentage >= 40) return { key: 'needs_work', label: 'Needs work', emoji: '🟠' };
-        return { key: 'weak', label: 'Weak', emoji: '🔴' };
+        if (percentage >= 80) return { key: 'strong', status: 'Strong', emoji: '🟢' };
+        if (percentage >= 60) return { key: 'developing', status: 'Developing', emoji: '🟡' };
+        if (percentage >= 40) return { key: 'needs_work', status: 'Needs work', emoji: '🟠' };
+        return { key: 'weak', status: 'Weak', emoji: '🔴' };
     }
 
     generateDiagnostic() {

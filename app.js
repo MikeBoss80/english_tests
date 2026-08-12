@@ -27,7 +27,8 @@ class App {
             backToTest: () => this.backToTest(),
             submit: () => this.submit(),
             restart: () => this.restart(),
-            goHome: () => this.goHome()
+            goHome: () => this.goHome(),
+            nextLevel: (level) => this.nextLevel(level)
         });
         this.engine = null;
         this.currentLevel = null;
@@ -157,6 +158,9 @@ class App {
     }
 
     submit() {
+        const elapsedSeconds = this.engine.startedAt
+            ? Math.max(0, Math.round((Date.now() - new Date(this.engine.startedAt).getTime()) / 1000))
+            : null;
         const engine = new ScoringEngine(this.engine.questions, this.engine.answers);
         const scores = engine.calculateScore();
         const diagnostic = new DiagnosticEngine(scores).generateDiagnostic();
@@ -164,7 +168,7 @@ class App {
         const mode = this.engine.mode;
         const level = this.currentLevel;
         this.engine.clear(level, mode);
-        this.ui.renderResults(level, mode, scores, diagnostic, levelInfo);
+        this.ui.renderResults(level, mode, scores, diagnostic, levelInfo, elapsedSeconds);
     }
 
     // ------------------------------------------------------------
@@ -183,6 +187,12 @@ class App {
         this.currentLevel = null;
         this.engine = null;
         this.ui.renderWelcome();
+    }
+
+    nextLevel(level) {
+        this.currentLevel = null;
+        this.engine = null;
+        this.selectLevel(level);
     }
 }
 

@@ -504,41 +504,58 @@ export class UIController {
     // ------------------------------------------------------------
     // PANTALLA 5: Resultados
     // ------------------------------------------------------------
-    renderResults(level, mode, scores, diagnostic, levelInfo) {
+    renderResults(level, mode, scores, diagnostic, levelInfo, elapsedSeconds = null) {
         this.currentView = 'results';
 
         // Assessment ID ejemplo: A2-2026-XXXX
         const assessmentId = this.makeAssessmentId(level);
         const modeLabel = MODE_LABELS[mode] || mode;
-        const isDiag = mode === MODES.DIAGNOSTIC;
+        const timeStr = this.formatTime(elapsedSeconds);
+        const next = ({ A1: 'A2', A2: 'B1' })[level];
+        const reviewRows = this.buildReviewRows(scores.details || []);
+        const reviewSummary = this.buildReviewSummary(scores.details || []);
+        const nextLevelBanner = this.buildNextLevelBanner(level, levelInfo, next);
+        const downloadText = this.buildDownloadText(level, modeLabel, assessmentId, timeStr, scores, diagnostic, levelInfo);
+        const interpretation = this.getLevelInterpretation(level, levelInfo);
+
+        const SECTION_ICONS = { grammar: '📘', vocabulary: '📖', reading: '📚', language_use: '💬' };
 
         const sectionRows = Object.entries(scores.bySection).map(([sec, data]) => {
             const label = SECTION_LABELS[sec] || sec;
             const cls = data.percentage >= 80 ? 'high' : data.percentage >= 60 ? 'medium' : 'low';
+            const icon = SECTION_ICONS[sec] || '📝';
             return `
-                <div class="section-bar">
-                    <span class="section-bar-label">${label}</span>
-                    <div class="section-bar-track">
-                        <div class="section-bar-fill ${cls}" style="width: ${data.percentage}%"></div>
+                <div class="section-card sec-${sec}">
+                    <span class="section-card-icon">${icon}</span>
+                    <div class="section-card-info">
+                        <span class="section-card-label">${label}</span>
+                        <div class="section-card-track">
+                            <div class="section-bar-fill ${cls}" style="width: ${data.percentage}%"></div>
+                        </div>
                     </div>
-                    <span class="section-bar-pct">${data.percentage}% <small>(${data.correct}/${data.total})</small></span>
+                    <span class="section-card-pct">
+                        <strong>${data.percentage}%</strong>
+                        <small>${data.correct}/${data.total} correct</small>
+                    </span>
                 </div>
             `;
         }).join('');
 
-        const topicRows = diagnostic.topicAnalysis.map(t => `
-            <tr>
-                <td>${t.label}</td>
-                <td>
-                    <div class="topic-bar-track">
-                        <div class="topic-bar-fill ${t.percentage >= 80 ? 'high' : t.percentage >= 60 ? 'medium' : 'low'}"
-                            style="width: ${t.percentage}%"></div>
+        const topicRows = diagnostic.topicAnalysis.map(t => {
+            const cls = t.percentage >= 80 ? 'high' : t.percentage >= 60 ? 'medium' : 'low';
+            return `
+                <div class="topic-row">
+                    <span class="topic-name">${t.label}</span>
+                    <div class="topic-meter">
+                        <div class="topic-bar-track">
+                            <div class="topic-bar-fill ${cls}" style="width: ${t.percentage}%"></div>
+                        </div>
+                        <span class="topic-pct pct-${cls}">${t.percentage}%</span>
                     </div>
-                    <span class="topic-pct">${t.percentage}%</span>
-                </td>
-                <td><span class="status-pill ${t.key}">${t.emoji} ${t.label}</span></td>
-            </tr>
-        `).join('');
+                    <span class="status-pill ${t.key}">${t.emoji} ${t.status}</span>
+                </div>
+            `;
+        }).join('');
 
         // Known / Developing / Needs practice
         const strongList = diagnostic.strong.map(t => `<li>${t.label}</li>`).join('');
@@ -558,7 +575,13 @@ export class UIController {
                 <div class="results-head">
                     <span class="section-tag">Level ${level} Result · ${modeLabel}</span>
                     <h2>Your English Assessment Result</h2>
-                    <div class="assessment-id">Assessment ID: <strong>${assessmentId}</strong></div>
+                    <div class="result-meta-chips">
+                        <span class="meta-chip">Level <strong>${level}</strong></span>
+                        <span class="meta-chip">${mode === MODES.DIAGNOSTIC ? '⚡' : '🎯'} ${modeLabel}</span>
+                        <span class="meta-chip">✅ <strong>${scores.totalCorrect}/${scores.totalQuestions}</strong> correct</span>
+                        ${timeStr ? `<span class="meta-chip">⏱️ ${timeStr}</span>` : ''}
+                    </div>
+                    <div class="assessment-id">ID: <strong>${assessmentId}</strong></div>
                 </div>
 
                 <div class="overall-result">
@@ -569,13 +592,12 @@ export class UIController {
                         </div>
                     </div>
                     <div class="level-result">
-                        <span class="level-badge ${levelInfo.value.toLowerCase()}">${levelInfo.label}</span>
-                        <p class="level-desc">
-                            Overall score: <strong>${scores.overall}%</strong>
-                            (${scores.totalCorrect} / ${scores.totalQuestions} correct)
-                        </p>
+                        <span class="level-badge ${levelInfo.value.toLowerCase()}">${level} · ${levelInfo.label}</span>
+                        <p class="level-interpretation">${interpretation}</p>
                     </div>
                 </div>
+
+                ${nextLevelBanner}
 
                 <div class="section-scores">
                     <h3>Performance by Section</h3>
@@ -584,27 +606,20 @@ export class UIController {
 
                 <div class="diagnostic-sections">
                     <h3>Topic Diagnosis</h3>
-                    <div class="topic-table-wrap">
-                        <table class="topic-table">
-                            <thead>
-                                <tr><th>Topic</th><th>Score</th><th>Status</th></tr>
-                            </thead>
-                            <tbody>${topicRows}</tbody>
-                        </table>
-                    </div>
+                    <div class="topic-list">${topicRows || '<p class="muted">No topics to show.</p>'}</div>
                 </div>
 
                 <div class="diagnostic-feedback">
                     <div class="strengths">
-                        <h4>🟢 Strong</h4>
+                        <h4>🟢 Strong <span class="list-count">${diagnostic.strong.length}</span></h4>
                         <ul>${strongList || '<li class="muted">No strong areas yet.</li>'}</ul>
                     </div>
                     <div class="developing-list">
-                        <h4>🟡 Developing</h4>
+                        <h4>🟡 Developing <span class="list-count">${diagnostic.developing.length}</span></h4>
                         <ul>${developingList || '<li class="muted">No developing areas.</li>'}</ul>
                     </div>
                     <div class="weaknesses">
-                        <h4>🔴 Needs practice</h4>
+                        <h4>🔴 Needs practice <span class="list-count">${diagnostic.needsWork.length}</span></h4>
                         <ul>${needsWorkList || '<li class="muted">Nothing flagged.</li>'}</ul>
                     </div>
                 </div>
@@ -614,8 +629,16 @@ export class UIController {
                     ${recList ? `<ul class="rec-list">${recList}</ul>` : '<p class="muted">Great job! Keep practicing to consolidate what you know.</p>'}
                 </div>
 
+                <div class="answer-review no-print">
+                    <details class="review-block">
+                        <summary>👀 Review your answers <span class="review-count">${reviewSummary}</span></summary>
+                        <div class="review-list">${reviewRows || '<p class="muted">No answers to review.</p>'}</div>
+                    </details>
+                </div>
+
                 <div class="actions no-print">
                     <button class="btn btn-primary" id="print-btn">🖨 Print / Save as PDF</button>
+                    <button class="btn btn-secondary" id="download-btn">⬇ Download result</button>
                     <button class="btn btn-secondary" id="again-btn">Take Another Test</button>
                     <button class="btn btn-ghost" id="home-btn">Home</button>
                 </div>
@@ -623,14 +646,160 @@ export class UIController {
         `;
 
         document.getElementById('print-btn').addEventListener('click', () => window.print());
+        document.getElementById('download-btn').addEventListener('click', () => this.downloadText(downloadText, `${assessmentId}.txt`));
         document.getElementById('again-btn').addEventListener('click', () => this.actions.restart());
         document.getElementById('home-btn').addEventListener('click', () => this.actions.goHome());
+        const nextLevelBtn = document.getElementById('next-level-btn');
+        if (nextLevelBtn) nextLevelBtn.addEventListener('click', () => this.actions.nextLevel(next));
+    }
+
+    getLevelInterpretation(level, levelInfo) {
+        const meta = {
+            Consolidated: `🎉 Excellent! You've mastered the core skills of Level ${level}. You're ready to move on to the next challenge.`,
+            Developing: `📈 Good progress! You're building a solid foundation at Level ${level}. Focus on the areas below to make it stronger.`,
+            Beginning: `🌱 You're at the start of your Level ${level} journey. Follow the study priorities below and keep practicing.`
+        };
+        return meta[levelInfo.value] || '';
+    }
+
+    buildReviewSummary(details) {
+        let correct = 0, wrong = 0, skipped = 0;
+        for (const d of details) {
+            if (d.correct === true) correct++;
+            else if (d.correct === false) wrong++;
+            else skipped++;
+        }
+        const parts = [`✅ ${correct}`];
+        if (wrong > 0) parts.push(`❌ ${wrong}`);
+        if (skipped > 0) parts.push(`⬜ ${skipped}`);
+        return parts.join(' · ');
     }
 
     makeAssessmentId(level) {
         const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         const rand = Array.from({ length: 6 }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
         return `${level}-${new Date().getFullYear()}-${rand}`;
+    }
+
+    // ------------------------------------------------------------
+    // Helpers para la pantalla de resultados
+    // ------------------------------------------------------------
+    formatTime(seconds) {
+        if (seconds === null || seconds === undefined || isNaN(seconds)) return null;
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return m > 0 ? `${m}m ${s}s` : `${s}s`;
+    }
+
+    formatAnswerValue(d) {
+        const v = d.given;
+        if (v === undefined || v === null || v === '') return '';
+        if (d.type === 'ordering') return Array.isArray(v) ? v.join(' · ') : String(v);
+        if (d.type === 'matching') {
+            return (d.pairs || []).map(p => `${p.left} → ${v[p.left] || '—'}`).join(' · ');
+        }
+        return String(v);
+    }
+
+    formatCorrectValue(d) {
+        if (d.type === 'ordering') return Array.isArray(d.answer) ? d.answer.join(' · ') : String(d.answer || '');
+        if (d.type === 'matching') {
+            return (d.pairs || []).map(p => `${p.left} → ${p.right}`).join(' · ');
+        }
+        return d.answer === undefined || d.answer === null ? '—' : String(d.answer);
+    }
+
+    buildReviewRows(details) {
+        return details.map((d, i) => {
+            const state = d.correct === true ? 'correct' : d.correct === false ? 'incorrect' : 'unanswered';
+            const mark = d.correct === true ? '✅' : d.correct === false ? '❌' : '⬜';
+            const given = this.formatAnswerValue(d);
+            const section = SECTION_LABELS[d.section] || d.section;
+            return `
+                <details class="review-item ${state}">
+                    <summary>
+                        <span class="review-mark">${mark}</span>
+                        <span class="review-q">${i + 1}. ${this.esc(d.question || '')}</span>
+                    </summary>
+                    <div class="review-body">
+                        <p><span class="review-tag">${section}</span></p>
+                        <p><strong>Your answer:</strong>
+                            <span class="${state === 'correct' ? 'text-ok' : state === 'incorrect' ? 'text-bad' : 'text-muted'}">
+                                ${given ? this.esc(given) : '— not answered —'}
+                            </span>
+                        </p>
+                        ${state !== 'correct' ? `<p><strong>Correct answer:</strong> ${this.esc(this.formatCorrectValue(d))}</p>` : ''}
+                        ${d.explanation ? `<p class="review-explanation"><strong>Explanation:</strong> ${this.esc(d.explanation)}</p>` : ''}
+                    </div>
+                </details>
+            `;
+        }).join('');
+    }
+
+    buildNextLevelBanner(level, levelInfo, next) {
+        if (levelInfo.value === 'Consolidated' && next) {
+            return `
+                <div class="next-level-banner banner-success">
+                    <span>🎉 <strong>Consolidated!</strong> You're ready for the next level.</span>
+                    <button class="btn btn-primary btn-sm" id="next-level-btn">Take Level ${next} →</button>
+                </div>
+            `;
+        }
+        if (levelInfo.value === 'Consolidated') {
+            return `
+                <div class="next-level-banner banner-success">🎉 <strong>Consolidated!</strong> You reached the highest level covered by this assessment.</div>
+            `;
+        }
+        if (levelInfo.value === 'Developing') {
+            return `
+                <div class="next-level-banner banner-info">📈 <strong>Developing.</strong> Review the <em>Needs practice</em> topics and try the full test for a deeper diagnosis.</div>
+            `;
+        }
+        return `
+            <div class="next-level-banner banner-warn">📚 <strong>Beginning.</strong> Follow the recommended study priorities and retake the test to track your progress.</div>
+        `;
+    }
+
+    buildDownloadText(level, modeLabel, assessmentId, timeStr, scores, diagnostic, levelInfo) {
+        const L = [];
+        L.push('ENGLISH ASSESSMENT RESULT');
+        L.push('========================');
+        L.push(`Level: ${level} · ${modeLabel}`);
+        L.push(`Assessment ID: ${assessmentId}`);
+        L.push(`Date: ${new Date().toLocaleString()}`);
+        if (timeStr) L.push(`Time taken: ${timeStr}`);
+        L.push(`Overall score: ${scores.overall}% (${scores.totalCorrect} / ${scores.totalQuestions} correct)`);
+        L.push(`Result: ${levelInfo.label}`);
+        L.push('');
+        L.push('PERFORMANCE BY SECTION');
+        for (const [sec, data] of Object.entries(scores.bySection)) {
+            L.push(`  ${SECTION_LABELS[sec] || sec}: ${data.percentage}% (${data.correct} / ${data.total})`);
+        }
+        L.push('');
+        L.push('TOPIC DIAGNOSIS');
+        for (const t of diagnostic.topicAnalysis) {
+            L.push(`  ${t.label}: ${t.percentage}% ${t.emoji} ${t.status}`);
+        }
+        if (diagnostic.recommendations.length) {
+            L.push('');
+            L.push('RECOMMENDED STUDY PRIORITIES');
+            diagnostic.recommendations.forEach((r, i) => {
+                L.push(`  ${i + 1}. ${r.label} (${r.percentage}%) — ${r.text}`);
+            });
+        }
+        return L.join('\n');
+    }
+
+    downloadText(text, filename) {
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     // ------------------------------------------------------------

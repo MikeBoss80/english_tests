@@ -1,8 +1,0 @@
-/* assets/css/print.css — Estilos extra para Print / Save as PDF */
-
-@media print {
-    body {
-        background: #fff !important;
-        padding: 0 !important;
-    }
-}

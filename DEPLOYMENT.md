@@ -89,7 +89,7 @@ Then open http://localhost:8080
 │   ├── diagnostic-engine.js
 │   └── ui-controller.js
 └── assets/
-    └── css/print.css
+    └── icons/
 ```
 
 No user data ever leaves the browser (all progress is stored in `localStorage`).
