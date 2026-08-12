@@ -1792,6 +1792,10 @@ li.muted {
         display: none !important;
     }
 
+    .nav-actions-question {
+        display: none !important;
+    }
+
     .level-card {
         break-inside: avoid;
     }
@@ -1893,6 +1897,45 @@ li.muted {
     .nav-actions .btn {
         width: 100%;
         justify-content: center;
+    }
+
+    /* Barra de navegación fija (móvil): Previous izq + Next/Review der */
+    .nav-actions-question {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 100;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+        background: var(--bg-card);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid var(--gray-200);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .nav-actions-question .btn {
+        width: auto;
+        min-width: 0;
+    }
+
+    .nav-actions-question #prev-btn {
+        flex-shrink: 0;
+    }
+
+    .nav-actions-question #next-btn,
+    .nav-actions-question #review-btn {
+        flex: 1;
+    }
+
+    .question-container {
+        padding-bottom: 92px;
     }
 
     .rec-item p {
