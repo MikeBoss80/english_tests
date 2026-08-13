@@ -1,1398 +1,2287 @@
-tengo una idea quiero crear para subir a github pages, es decir para que sea gratis el subir el proyecto  donde pueda generar  test de ingles por nivel para medir el nivel ya que quiero empezar a categorizar eso para las personas  donde lo ideal es que sea pruebas muy completas 
+# English Tests
 
+## Roadmap Maestro de Producto y Desarrollo
 
-diseñar una V1 mucho más simple, ligera y autónoma, y creo que es la mejor decisión.
+### Versión inicial: Static Web Application
 
-La primera versión sería esencialmente:
+### Tecnología objetivo: HTML + CSS + JavaScript + JSON + assets estáticos
 
-Frontend estático → banco de preguntas → motor de evaluación → diagnóstico → resultado descargable/imprimible
+### Backend: ninguno
 
-Sin backend, sin cuentas, sin base de datos, sin archivos de audio y sin necesidad de que tú intervengas para obtener el resultado.
+### Base de datos: ninguna
 
-1. Arquitectura de la V1
+### Frameworks: ninguno
 
-La imaginaría así:
+---
 
-                    ENGLISH ASSESSMENT
-                           │
-             ┌─────────────┴─────────────┐
-             │                           │
-          A1 TEST                     A2 TEST
-             │                           │
-             └─────────────┬─────────────┘
-                           │
-                    QUESTION ENGINE
-                           │
-                    STUDENT ANSWERS
-                           │
-                     SCORING ENGINE
-                           │
-              ┌────────────┴────────────┐
-              │                         │
-        OVERALL RESULT            DIAGNOSTIC
-              │                         │
-              └────────────┬────────────┘
-                           │
-                    RESULTS SCREEN
-                           │
-              ┌────────────┴────────────┐
-              │                         │
-            PRINT                  DOWNLOAD
+# 1. Visión del producto
 
-Todo ocurre en el navegador.
+English Tests será una plataforma web gratuita para:
 
-No se envía nada a un servidor.
+1. descubrir el nivel aproximado de inglés de una persona;
+2. identificar el nivel aproximado en cada competencia;
+3. realizar tests completos y formales de un nivel específico;
+4. practicar vocabulario de manera independiente;
+5. proporcionar información clara sobre qué significa cada nivel A1–C2;
+6. evolucionar posteriormente hacia una plataforma monetizada mediante publicidad.
 
-2. Eso hace que GitHub Pages sea perfecto
+La arquitectura inicial debe funcionar completamente como sitio estático.
 
-La aplicación puede ser completamente estática:
+```text
+Browser
+   │
+   ├── HTML
+   ├── CSS
+   ├── JavaScript
+   ├── JSON
+   ├── Images
+   └── Audio
+```
 
-index.html
-styles.css
-app.js
+No necesitamos:
 
-/data
-   a1.js
-   a2.js
+* servidor;
+* API propia;
+* base de datos;
+* login;
+* cuentas;
+* framework;
+* sistema de administración.
 
-/assets
-   icons/
+---
 
-Incluso podemos evitar tener cientos de archivos.
+# 2. Arquitectura funcional definitiva
 
-Las preguntas pueden estar en archivos JSON/JS y el navegador las carga.
+La página tendrá tres grandes productos.
 
-Por ejemplo:
+## A. Diagnostic Test
 
+Pregunta principal:
+
+> What is my English level?
+
+Evalúa globalmente A1–C2.
+
+Resultado:
+
+```text
+Overall Level
+B1
+
+Overall Score
+68%
+
+Skills
+
+Grammar       B1
+Vocabulary    B1
+Reading       B2
+Listening     A2
+Use of English B1
+Writing       A2/B1
+```
+
+El diagnóstico debe ser relativamente eficiente.
+
+Su objetivo es descubrir dónde está la persona.
+
+---
+
+# 3. Level Tests
+
+Sección independiente:
+
+```text
+A1 Test
+A2 Test
+B1 Test
+B2 Test
+C1 Test
+C2 Test
+```
+
+Estos tests son más formales.
+
+Cada uno deberá evaluar las competencias correspondientes al nivel.
+
+Ejemplo:
+
+```text
+B1 Full Test
+
+Part 1 — Grammar
+Part 2 — Vocabulary
+Part 3 — Use of English
+Part 4 — Reading
+Part 5 — Listening
+Part 6 — Writing
+```
+
+El usuario podrá obtener un resultado detallado.
+
+---
+
+# 4. Vocabulary Practice
+
+Sección independiente.
+
+```text
+Vocabulary Practice
+
+A1
+A2
+B1
+B2
+C1
+C2
+```
+
+Dentro de cada nivel:
+
+```text
+Daily Life
+Family
+Food
+Travel
+Work
+Education
+Technology
+Health
+Shopping
+Nature
+Entertainment
+Phrasal Verbs
+Idioms
+Academic Vocabulary
+```
+
+Aquí el objetivo no es diagnosticar.
+
+Es practicar.
+
+---
+
+# 5. English Levels
+
+Debe existir una sección explicando A1–C2.
+
+Cada nivel tendrá:
+
+* descripción general;
+* comunicación;
+* grammar;
+* vocabulary;
+* reading;
+* listening;
+* writing;
+* ejemplos de situaciones que puede manejar;
+* principales diferencias con el nivel anterior;
+* principales objetivos para avanzar al siguiente nivel.
+
+La referencia conceptual será el CEFR, no una lista inventada de temas gramaticales. El Consejo de Europa mantiene el Companion Volume y sus versiones lingüísticas, incluida la española.
+
+---
+
+# 6. Principio fundamental de arquitectura
+
+Las preguntas NO deben estar programadas directamente dentro de la lógica de la aplicación.
+
+La aplicación debe interpretar datos.
+
+Ejemplo:
+
+```json
 {
-    id: "A1-GRAM-001",
-    section: "grammar",
-    topic: "present_simple",
-    difficulty: 1,
-    type: "multiple_choice",
-
-    question: "She ___ to school every day.",
-
-    options: [
-        "go",
-        "goes",
-        "going",
-        "gone"
-    ],
-
-    answer: "goes"
+  "id": "A2-GRAMMAR-027",
+  "level": "A2",
+  "skill": "grammar",
+  "topic": "past_simple",
+  "type": "multiple_choice",
+  "difficulty": 2,
+  "question": "Yesterday, I ___ to the supermarket.",
+  "options": [
+    "go",
+    "went",
+    "gone",
+    "going"
+  ],
+  "answer": 1
 }
+```
 
-El navegador hace todo.
+El motor solamente interpreta:
 
-3. No pondría una única metodología de pregunta
+```text
+type = multiple_choice
+```
 
-Aquí está una de las cosas que considero más importantes.
+y sabe cómo mostrarlo.
 
-Si queremos una evaluación seria, no debemos tener 100 preguntas del mismo estilo.
+Esto permite añadir miles de preguntas sin modificar el motor.
 
-Usaría diferentes tipos.
+---
 
-1. Multiple choice
-She ___ coffee every morning.
+# 7. Taxonomía de preguntas
 
-A. drink
-B. drinks
-C. drinking
-D. drank
-2. Fill in the blank
-I _______ from Colombia.
-3. Select the correct sentence
-A. She don't like pizza.
-B. She doesn't likes pizza.
-C. She doesn't like pizza.
-D. She not like pizza.
-4. Sentence completion
-Yesterday I was tired, so I ______.
-5. Matching
+Los tipos iniciales serán:
 
-Relacionar:
+```text
+multiple_choice
+true_false
+fill_one_word
+fill_sentence
+sentence_rewrite
+matching
+ordering
+image_choice
+image_description
+reading
+listening
+open_answer
+```
 
-1. hungry       A. very cold
-2. freezing     B. wanting food
-3. exhausted    C. very tired
-6. Ordering
+No todos estarán disponibles inmediatamente.
 
-Poner palabras en orden:
+Se incorporarán progresivamente.
 
-usually / breakfast / I / at 7:00 / have
-7. Error identification
-She go to school every day.
+---
 
-Which word is incorrect?
-8. Reading comprehension
+# 8. Metadata obligatoria
 
-Texto → preguntas.
+Cada pregunta debería tener como mínimo:
 
-9. Contextual vocabulary
-I need to buy bread. Where should I go?
+```text
+id
+level
+skill
+topic
+subtopic
+type
+difficulty
+question
+answer
+explanation
+```
 
-A. Pharmacy
-B. Bakery
-C. Library
-D. Bank
-10. Short answer
+Cuando corresponda:
 
-En algunas secciones podemos permitir que escriban una respuesta.
+```text
+options
+image
+audio
+passage
+accepted_answers
+instructions
+```
 
-4. Incluso podemos evaluar sin "saber" únicamente la respuesta correcta
+Opcionalmente:
 
-Esto es especialmente útil en vocabulario.
+```text
+tags
+estimated_time
+source
+license
+author
+review_status
+```
 
-Por ejemplo:
+---
 
-What does "expensive" mean?
+# 9. Regla de oro para preguntas abiertas
 
-No es tan interesante como:
+Nunca debemos depender de que el usuario adivine qué queremos.
 
-I don't want to buy this phone. It's too ______.
+Toda pregunta abierta debe especificar:
 
-A. cheap
-B. expensive
-C. easy
-D. small
+### Qué debe responder
 
-Estamos evaluando uso del idioma, no únicamente memoria.
+```text
+Write ONE word.
+```
 
-5. A1 y A2 serían evaluaciones realmente completas
+o:
 
-Yo cambiaría un poco la cantidad que te propuse anteriormente.
+```text
+Write the complete sentence.
+```
 
-Como no vamos a tener listening ni speaking todavía, podemos aprovechar ese espacio para profundizar en las competencias que sí podemos medir automáticamente.
+o:
 
-A1
+```text
+Rewrite the sentence using the past simple.
+```
 
-90–100 ítems
+o:
 
-Área	Ítems
-Grammar	35
-Vocabulary	25
-Reading	20
-Language Use / Context	15
-Writing diagnóstico	1
-Total	95 + writing
-A2
+```text
+Answer in 2–3 sentences.
+```
 
-105–120 ítems
+### Tema
 
-Área	Ítems
-Grammar	40
-Vocabulary	25
-Reading	25
-Language Use / Context	20
-Writing diagnóstico	1
-Total	110 + writing
+Cuando sea útil:
 
-El writing puede quedar inicialmente como una actividad opcional no puntuada automáticamente.
+```text
+Grammar — Present Perfect
+```
 
-Así mantenemos la autonomía.
+### Contexto
 
-6. Pero no mostraría 110 preguntas de golpe
+La frase debe proporcionar suficiente información para que exista una respuesta claramente esperada.
 
-Esto es muy importante para UX.
+---
 
-La persona debería ver algo así:
+# 10. FASE 0 — Product Specification
 
-A2 English Assessment
+## Sprint 0.1 — Definición funcional
 
-Progress
-████████░░░░░░░░░░░░ 42%
+### Objetivos
 
-Question 47 / 110
+Documentar:
 
-Grammar
-────────────────────────
+* Diagnostic Test;
+* Level Tests;
+* Vocabulary Practice;
+* English Levels;
+* resultados;
+* competencias;
+* tipos de preguntas.
 
-Choose the correct answer:
+### Entregables
 
-She _______ here since 2022.
+```text
+/docs
+    product-specification.md
+    levels.md
+    skills.md
+    question-types.md
+    scoring.md
+```
 
-○ lives
-○ lived
-○ has lived
-○ is living
+### Criterio de finalización
 
-Y botones:
+No debe existir ninguna funcionalidad importante sin definir.
 
-← Previous
+---
 
-Next →
+# 11. Sprint 0.2 — Modelo CEFR
 
-7. Incluso podemos dividirlo en módulos
+Crear una matriz interna:
 
-Por ejemplo:
-
-A1
-
-Section 1 — Grammar Foundations
-20 preguntas
-
-Section 2 — Grammar in Context
-15 preguntas
-
-Section 3 — Vocabulary
-25 preguntas
-
-Section 4 — Reading
-20 preguntas
-
-Section 5 — Everyday English
-15 preguntas
-
-A2
-
-Section 1 — Grammar
-25
-
-Section 2 — Grammar in Context
-15
-
-Section 3 — Vocabulary
-25
-
-Section 4 — Reading
-25
-
-Section 5 — Everyday English
-20
-
-Esto hace que una prueba de 110 preguntas no se sienta como una lista interminable.
-
-8. También pondría progreso y guardado local
-
-Como no habrá backend, podemos aprovechar:
-
-localStorage
-
-Por ejemplo:
-
-Student starts A2
-        ↓
-answers question 1
-        ↓
-localStorage
-        ↓
-closes browser
-        ↓
-returns later
-        ↓
-Continue Assessment
-
-No necesitamos registrar ningún dato personal.
-
-Incluso podemos guardar únicamente:
-
-{
-    test: "A2",
-    answers: {...},
-    currentQuestion: 47,
-    startedAt: "...",
-}
-9. El botón "Evaluar" sería el momento clave
-
-Al terminar:
-
-Submit Assessment
-
-Podemos mostrar una confirmación:
-
-You have answered 108 of 110 questions.
-Are you sure you want to submit?
-
-Y después:
-
-Your English Assessment Result
-
-A2 — Developing
-
-Overall score
-
-76%
-
-10. Pero el resultado no sería solamente 76%
-
-Mostraríamos algo mucho más interesante:
-
-YOUR PROFILE
-
-Grammar             72%  ██████████████░░░░
-Vocabulary          84%  █████████████████░
-Reading             81%  ████████████████░░
-Language Use        68%  █████████████░░░░░
-
-Y después:
-
-Level interpretation
-
-Your current performance is consistent with A2.
-
-You demonstrate good control of basic English structures and everyday vocabulary. Your main areas for improvement are more complex grammar structures and sentence formation.
-
-11. Después vendría el diagnóstico por temas
-
-Esto es lo que realmente hará diferente tu proyecto.
-
-Grammar
-Topic	Score	Status
-Verb to be	100%	🟢 Strong
-Present Simple	95%	🟢 Strong
-Present Continuous	90%	🟢 Strong
-Past Simple	80%	🟢 Good
-Future forms	72%	🟡 Developing
-Present Perfect	55%	🟠 Needs work
-Conditionals	40%	🔴 Weak
-Vocabulary
-Topic	Score
-Family	100%
-Daily routines	95%
-Food	90%
-Travel	80%
-Work	75%
-Health	60%
-
-Esto se puede generar automáticamente porque cada pregunta tendrá metadata.
-
-12. También podemos mostrar "Known / Developing / Weak"
-
-En vez de bombardear al estudiante con porcentajes:
-
-🟢 Strong
-Present Simple
-Daily routines
-Family vocabulary
-Basic reading
-🟡 Developing
-Past Simple
-Future forms
-Comparatives
-Travel vocabulary
-🔴 Needs practice
-Present Perfect
-Conditionals
-Complex sentence formation
-
-Esto es mucho más comprensible.
-
-13. Y podemos generar recomendaciones automáticamente
-
-Por ejemplo:
-
-if (presentPerfect < 60) {
-    recommendations.push(
-        "Review the difference between Past Simple and Present Perfect."
-    );
-}
-
-Entonces el informe puede terminar con:
-
-Recommended study priorities
-
-1. Present Perfect
-Review have/has + past participle and its use with ever, never, already, yet, for, since.
-
-2. Conditionals
-Practice the First Conditional and common real-life situations.
-
-3. Vocabulary
-Expand vocabulary related to work, health and travel.
-
-14. El resultado podría imprimirse perfectamente
-
-No necesitamos crear un PDF complejo inicialmente.
-
-Podemos hacer:
-
-[ Print / Save as PDF ]
-
-mediante:
-
-window.print();
-
-Y crear CSS específico:
-
-@media print {
-    .no-print {
-        display: none;
-    }
-}
-
-Entonces el usuario puede seleccionar:
-
-Save as PDF
-
-desde el propio navegador.
-
-Cero servidor.
-
-Más adelante podemos agregar un generador PDF real si vemos que vale la pena.
-
-15. Incluso podemos generar un código de resultado
-
-Esto podría ser útil posteriormente.
-
-Por ejemplo:
-
-Assessment ID
-A2-2026-8F3K91
-
-Y el resultado:
-
-Level: A2
-Score: 76%
-Grammar: 72%
-Vocabulary: 84%
-Reading: 81%
-Language Use: 68%
-
-Pero inicialmente no necesitamos guardar ese resultado en ningún lugar.
-
-Simplemente se genera localmente.
-
-16. Hay una decisión importante que tomaría ahora
-
-Yo no haría que el A1 y A2 sean solamente "tests para aprobar".
-
-Los convertiría en:
-
-A1 Comprehensive Assessment
-
-y
-
-A2 Comprehensive Assessment
-
-Cada uno mide el dominio de ese nivel.
-
-Entonces posteriormente podemos establecer reglas:
-
-A1
+```text
+Level
 │
-├── < 60% → A1 Beginning
-├── 60–79% → A1 Developing
-└── ≥ 80% → A1 Consolidated
-                     │
-                     ↓
-                  A2 Test
+├── Communication
+├── Grammar
+├── Vocabulary
+├── Reading
+├── Listening
+├── Writing
+└── Use of English
+```
 
-Y A2:
+Para:
 
-A2
-│
-├── < 60% → A2 Beginning
-├── 60–79% → A2 Developing
-└── ≥ 80% → A2 Consolidated
-                     │
-                     ↓
-                  B1 Test
-
-Los porcentajes exactos no los fijaría todavía. Primero necesitamos construir la prueba y su matriz de dificultad; después podemos definir los thresholds de forma más fundamentada.
-
-17. Mi propuesta para el proyecto V1
-
-Quedaría así:
-
-🟦 Frontend
-HTML
-CSS
-JavaScript
-Responsive
-Sin framework obligatorio
-🟩 Data
-Banco A1
-Banco A2
-Metadata de cada pregunta
-🟨 Assessment Engine
-Respuestas
-Scoring
-Topic scoring
-Skill scoring
-Level classification
-Diagnostic analysis
-🟧 UX
-Pantalla inicial
-Selección A1/A2
-Instrucciones
-Test por secciones
-Barra de progreso
-Navegación
-Confirmación
-Resultados
-Print / Save as PDF
-Reiniciar test
-🟥 Sin backend
-
-Por ahora:
-
-No login → No database → No API → No audio → No servidor → No cuentas.
-
-Eso hace que sea extremadamente fácil de desplegar en GitHub Pages.
-
-Y yo haría una cosa antes de programarlo
-
-Construiría primero el Blueprint académico de A1 y A2.
-
-No las 200 preguntas de una vez.
-
-Primero:
-
+```text
 A1
- ├── Grammar
- │    ├── Verb to be
- │    ├── Present Simple
- │    ├── Present Continuous
- │    ├── ...
- │
- ├── Vocabulary
- │    ├── Personal information
- │    ├── Family
- │    ├── Daily routines
- │    ├── ...
- │
- ├── Reading
- │    ├── ...
- │
- └── Language Use
-      ├── ...
+A2
+B1
+B2
+C1
+C2
+```
 
-Y para cada tema definir:
+Importante:
 
-qué debe saber → qué subtemas evaluar → cuántas preguntas → dificultad → tipo de pregunta → criterio de dominio.
+No copiar grandes cantidades de texto del CEFR.
 
-Después generamos el banco.
+Utilizarlo como referencia y redactar nuestras propias explicaciones.
 
-Así la aplicación que programemos después no será solamente un quiz de inglés, sino una herramienta diagnóstica de nivel A1/A2 que luego podremos extender a B1, B2, etc., sin tener que rehacer toda la arquitectura.
-¡Excelente idea! Tu visión para una herramienta de evaluación de inglés autónoma y completa es muy sólida. Te propongo una implementación práctica y bien estructurada para tu V1 en GitHub Pages.
+### Entregable
 
-Estructura de Archivos del Proyecto
-text
-english-assessment/
+```text
+/docs/cefr-level-matrix.md
+```
+
+---
+
+# 12. Sprint 0.3 — Definición de scoring
+
+Antes de crear cientos de preguntas debemos decidir:
+
+```text
+¿Cómo se transforma una respuesta en una medición?
+```
+
+Debemos diferenciar:
+
+```text
+raw score
+skill score
+level estimate
+overall estimate
+```
+
+No usar simplemente:
+
+```text
+correct answers / total questions
+```
+
+para determinar automáticamente A1–C2.
+
+La dificultad y el nivel objetivo de cada pregunta deben formar parte del modelo.
+
+### Entregable
+
+```text
+/docs/scoring-model.md
+```
+
+---
+
+# 13. FASE 1 — Arquitectura técnica
+
+## Sprint 1.1 — Reorganización del proyecto
+
+Propuesta:
+
+```text
+/
 ├── index.html
 ├── styles.css
 ├── app.js
-├── data/
-│   ├── a1-questions.js
-│   ├── a2-questions.js
-│   └── question-bank.js
+│
+├── pages/
+│
 ├── modules/
-│   ├── assessment-engine.js
-│   ├── scoring-engine.js
-│   ├── diagnostic-engine.js
-│   └── ui-controller.js
+│   ├── router.js
+│   ├── test-engine.js
+│   ├── question-renderer.js
+│   ├── scoring.js
+│   ├── results.js
+│   ├── storage.js
+│   └── accessibility.js
+│
+├── data/
+│   ├── diagnostic/
+│   ├── levels/
+│   │   ├── a1/
+│   │   ├── a2/
+│   │   ├── b1/
+│   │   ├── b2/
+│   │   ├── c1/
+│   │   └── c2/
+│   └── vocabulary/
+│
 ├── assets/
-│   ├── icons/
-│   └── css/
-│       └── print.css
-└── README.md
-Código Base para Comenzar
-1. Estructura de Preguntas (data/a1-questions.js)
-javascript
-// data/a1-questions.js
-export const A1_QUESTIONS = {
-    metadata: {
-        level: "A1",
-        totalQuestions: 95,
-        sections: {
-            grammar: { count: 35, weight: 0.37 },
-            vocabulary: { count: 25, weight: 0.26 },
-            reading: { count: 20, weight: 0.21 },
-            languageUse: { count: 15, weight: 0.16 }
-        }
-    },
-    questions: [
-        // Grammar - Verb to be
-        {
-            id: "A1-GRAM-001",
-            section: "grammar",
-            topic: "verb_to_be",
-            difficulty: 1,
-            type: "multiple_choice",
-            question: "She ___ a teacher.",
-            options: ["am", "is", "are", "be"],
-            answer: "is",
-            explanation: "Use 'is' with third person singular (she/he/it)"
-        },
-        // Más preguntas...
-    ]
-};
-2. Motor de Evaluación (modules/assessment-engine.js)
-javascript
-// modules/assessment-engine.js
-export class AssessmentEngine {
-    constructor(questions) {
-        this.questions = questions;
-        this.answers = new Map();
-        this.currentIndex = 0;
-        this.completedSections = new Set();
-    }
+│   ├── images/
+│   ├── audio/
+│   └── video/
+│
+├── docs/
+│
+└── tests/
+```
 
-    getCurrentQuestion() {
-        return this.questions[this.currentIndex];
-    }
+---
 
-    submitAnswer(questionId, answer) {
-        this.answers.set(questionId, answer);
-        this.saveProgress();
-    }
+# 14. Sprint 1.2 — Question Engine
 
-    getProgress() {
-        return {
-            total: this.questions.length,
-            answered: this.answers.size,
-            percentage: (this.answers.size / this.questions.length) * 100
-        };
-    }
+Crear el motor que:
 
-    saveProgress() {
-        const progress = {
-            answers: Array.from(this.answers.entries()),
-            currentIndex: this.currentIndex,
-            timestamp: new Date().toISOString()
-        };
-        localStorage.setItem('assessment_progress', JSON.stringify(progress));
-    }
+1. carga preguntas;
+2. selecciona preguntas;
+3. muestra instrucciones;
+4. renderiza el tipo correspondiente;
+5. guarda respuesta;
+6. valida;
+7. calcula resultado;
+8. pasa a la siguiente pregunta.
 
-    loadProgress() {
-        const saved = localStorage.getItem('assessment_progress');
-        if (saved) {
-            const progress = JSON.parse(saved);
-            this.answers = new Map(progress.answers);
-            this.currentIndex = progress.currentIndex;
-            return true;
-        }
-        return false;
-    }
+El motor no debe conocer el contenido específico.
 
-    nextQuestion() {
-        if (this.currentIndex < this.questions.length - 1) {
-            this.currentIndex++;
-            return this.getCurrentQuestion();
-        }
-        return null;
-    }
+---
 
-    previousQuestion() {
-        if (this.currentIndex > 0) {
-            this.currentIndex--;
-            return this.getCurrentQuestion();
-        }
-        return null;
-    }
+# 15. Sprint 1.3 — Question Renderer
+
+Crear componentes JavaScript pequeños:
+
+```text
+renderMultipleChoice()
+renderTrueFalse()
+renderFillOneWord()
+renderFillSentence()
+renderMatching()
+renderOrdering()
+renderImageChoice()
+renderListening()
+renderReading()
+```
+
+Sin framework.
+
+Cada función debe tener una responsabilidad clara.
+
+---
+
+# 16. FASE 2 — Banco de preguntas
+
+Aquí comienza una de las partes más importantes del proyecto.
+
+No debemos crear preguntas directamente en masa.
+
+Primero debemos crear una matriz.
+
+Ejemplo:
+
+| Level | Skill      | Topic            | Quantity |
+| ----- | ---------- | ---------------- | -------: |
+| A1    | Grammar    | Present simple   |       20 |
+| A1    | Vocabulary | Daily life       |       20 |
+| A1    | Reading    | Short texts      |       10 |
+| A1    | Listening  | Basic situations |       10 |
+
+Y así sucesivamente.
+
+---
+
+# 17. Sprint 2.1 — Question Guidelines
+
+Crear reglas para redactar preguntas.
+
+Cada pregunta debe pasar:
+
+### Clarity
+
+¿Se entiende exactamente qué debe hacer?
+
+### Validity
+
+¿Realmente mide la habilidad objetivo?
+
+### Uniqueness
+
+¿Existe una respuesta claramente correcta?
+
+### Difficulty
+
+¿Corresponde al nivel?
+
+### Context
+
+¿Tiene suficiente contexto?
+
+### Language quality
+
+¿Suena natural?
+
+### Bias
+
+¿Depende innecesariamente de conocimientos culturales?
+
+---
+
+# 18. Sprint 2.2 — A1 Question Bank
+
+Crear inicialmente:
+
+```text
+30–50 preguntas
+```
+
+No intentar crear 300 todavía.
+
+Distribución aproximada:
+
+```text
+Grammar
+Vocabulary
+Reading
+Listening
+Use of English
+```
+
+Añadir algunas preguntas visuales.
+
+---
+
+# 19. Sprint 2.3 — A2 Question Bank
+
+Repetir el proceso.
+
+Pero incrementar:
+
+* complejidad;
+* variedad;
+* longitud;
+* listening;
+* reading;
+* producción escrita.
+
+---
+
+# 20. Sprint 2.4 — B1 Question Bank
+
+Aquí el nivel de exigencia aumenta significativamente.
+
+Incluir:
+
+* textos;
+* situaciones reales;
+* opiniones;
+* narraciones;
+* gramática contextualizada;
+* listening con mayor naturalidad.
+
+---
+
+# 21. Sprint 2.5 — B2 Question Bank
+
+Mayor complejidad:
+
+* textos argumentativos;
+* inferencias;
+* vocabulario contextual;
+* collocations;
+* phrasal verbs;
+* estructuras gramaticales avanzadas.
+
+---
+
+# 22. Sprint 2.6 — C1 Question Bank
+
+Mayor énfasis en:
+
+* precisión;
+* matices;
+* registro;
+* inferencia;
+* vocabulario menos frecuente;
+* estructuras complejas;
+* comprensión de textos extensos.
+
+---
+
+# 23. Sprint 2.7 — C2 Question Bank
+
+C2 no debe ser simplemente:
+
+> "B2 pero más difícil."
+
+Debe medir:
+
+* precisión;
+* flexibilidad;
+* comprensión de matices;
+* registro;
+* inferencia;
+* lenguaje complejo;
+* producción sofisticada.
+
+---
+
+# 24. FASE 3 — Diagnostic Engine
+
+## Sprint 3.1 — Diagnóstico inicial
+
+Crear una versión funcional del Diagnostic Test.
+
+Primera versión:
+
+```text
+A1 → A2 → B1 → B2 → C1 → C2
+```
+
+Pero la selección debe diseñarse para proporcionar información eficiente.
+
+---
+
+# 25. Sprint 3.2 — Skill Scoring
+
+Cada pregunta tendrá:
+
+```text
+skill
+```
+
+Por ejemplo:
+
+```text
+grammar
+vocabulary
+reading
+listening
+writing
+use_of_english
+```
+
+El resultado se agrega por competencia.
+
+---
+
+# 26. Sprint 3.3 — Overall Level
+
+Calcular:
+
+```text
+overall level
+overall confidence
+skill levels
+```
+
+Ejemplo:
+
+```text
+Overall: B1
+
+Grammar: B1
+Vocabulary: B1
+Reading: B2
+Listening: A2
+Writing: B1
+```
+
+No mostrar falsa precisión.
+
+Mejor:
+
+```text
+Estimated level: B1
+```
+
+que:
+
+```text
+Your CEFR level is exactly B1.37
+```
+
+---
+
+# 27. Sprint 3.4 — Diagnostic Result
+
+Diseñar:
+
+```text
+Your English Level
+
+B1
+Intermediate
+
+Overall performance: 68%
+```
+
+Después:
+
+```text
+Your Skills
+
+Reading       B2
+Grammar       B1
+Vocabulary    B1
+Writing       B1
+Listening     A2
+```
+
+Y:
+
+```text
+Recommended practice
+
+Focus on:
+Listening
+Vocabulary
+```
+
+---
+
+# 28. FASE 4 — Full Level Tests
+
+Crear seis tests independientes.
+
+```text
+A1 Full Test
+A2 Full Test
+B1 Full Test
+B2 Full Test
+C1 Full Test
+C2 Full Test
+```
+
+Cada uno debe evaluar todas las competencias definidas.
+
+---
+
+# 29. Estructura de un Full Test
+
+Ejemplo:
+
+```text
+PART 1
+Grammar
+
+PART 2
+Vocabulary
+
+PART 3
+Use of English
+
+PART 4
+Reading
+
+PART 5
+Listening
+
+PART 6
+Writing
+```
+
+La cantidad de preguntas crecerá progresivamente.
+
+No es necesario que todos los niveles tengan exactamente el mismo número.
+
+---
+
+# 30. Sprint 4.1 — A1 Full Test
+
+Crear una experiencia completa.
+
+Debe sentirse diferente del Diagnostic.
+
+Más formal.
+
+Introducción:
+
+```text
+A1 English Test
+
+This test evaluates your English at A1 level.
+
+Estimated time:
+30–40 minutes
+```
+
+---
+
+# 31. Sprint 4.2 — A2 Full Test
+
+Repetir arquitectura.
+
+Incrementar dificultad.
+
+---
+
+# 32. Sprint 4.3 — B1 Full Test
+
+Mayor cantidad de reading/listening.
+
+Incorporar writing con instrucciones claras.
+
+---
+
+# 33. Sprint 4.4 — B2 Full Test
+
+Mayor longitud y complejidad.
+
+---
+
+# 34. Sprint 4.5 — C1 Full Test
+
+Mayor énfasis en:
+
+* precisión;
+* registro;
+* inferencia;
+* vocabulary;
+* reading.
+
+---
+
+# 35. Sprint 4.6 — C2 Full Test
+
+Test de mayor complejidad.
+
+---
+
+# 36. FASE 5 — Listening
+
+Esta fase es crítica.
+
+Para un producto estático podemos guardar:
+
+```text
+assets/audio/a1/
+assets/audio/a2/
+assets/audio/b1/
+assets/audio/b2/
+assets/audio/c1/
+assets/audio/c2/
+```
+
+Cada audio debe tener metadata.
+
+Ejemplo:
+
+```json
+{
+  "id": "A2-LISTEN-001",
+  "file": "a2-listen-001.mp3",
+  "duration": 42,
+  "accent": "British English",
+  "speakers": 2
 }
-3. Motor de Puntuación (modules/scoring-engine.js)
-javascript
-// modules/scoring-engine.js
-export class ScoringEngine {
-    constructor(questions, answers) {
-        this.questions = questions;
-        this.answers = answers;
-    }
-
-    calculateScore() {
-        const results = {
-            overall: 0,
-            bySection: {},
-            byTopic: {},
-            totalCorrect: 0,
-            totalQuestions: this.questions.length
-        };
-
-        // Agrupar por sección y tema
-        const groups = this.groupQuestions();
-
-        // Calcular puntuaciones por sección
-        for (const [section, questions] of Object.entries(groups.sections)) {
-            const correct = this.countCorrect(questions);
-            results.bySection[section] = {
-                correct,
-                total: questions.length,
-                percentage: (correct / questions.length) * 100
-            };
-        }
-
-        // Calcular puntuaciones por tema
-        for (const [topic, questions] of Object.entries(groups.topics)) {
-            const correct = this.countCorrect(questions);
-            results.byTopic[topic] = {
-                correct,
-                total: questions.length,
-                percentage: (correct / questions.length) * 100
-            };
-        }
-
-        // Calcular total general
-        results.totalCorrect = Object.values(results.bySection)
-            .reduce((sum, section) => sum + section.correct, 0);
-        results.overall = (results.totalCorrect / this.questions.length) * 100;
-
-        return results;
-    }
-
-    groupQuestions() {
-        const sections = {};
-        const topics = {};
-
-        for (const question of this.questions) {
-            // Por sección
-            if (!sections[question.section]) {
-                sections[question.section] = [];
-            }
-            sections[question.section].push(question);
-
-            // Por tema
-            if (!topics[question.topic]) {
-                topics[question.topic] = [];
-            }
-            topics[question.topic].push(question);
-        }
-
-        return { sections, topics };
-    }
-
-    countCorrect(questions) {
-        return questions.filter(q => {
-            const answer = this.answers.get(q.id);
-            return answer && answer === q.answer;
-        }).length;
-    }
-
-    determineLevel(score) {
-        if (score >= 80) return "Consolidated";
-        if (score >= 60) return "Developing";
-        return "Beginning";
-    }
-}
-4. Motor de Diagnóstico (modules/diagnostic-engine.js)
-javascript
-// modules/diagnostic-engine.js
-export class DiagnosticEngine {
-    constructor(scores, questions) {
-        this.scores = scores;
-        this.questions = questions;
-    }
-
-    generateDiagnostic() {
-        const strengths = [];
-        const weaknesses = [];
-        const recommendations = [];
-
-        // Analizar por tema
-        for (const [topic, data] of Object.entries(this.scores.byTopic)) {
-            if (data.percentage >= 80) {
-                strengths.push(topic);
-            } else if (data.percentage < 60) {
-                weaknesses.push(topic);
-            }
-        }
-
-        // Generar recomendaciones específicas
-        for (const weakness of weaknesses) {
-            const recommendation = this.getRecommendation(weakness);
-            if (recommendation) {
-                recommendations.push(recommendation);
-            }
-        }
-
-        return {
-            strengths,
-            weaknesses,
-            recommendations,
-            level: this.scores.overall >= 80 ? "A1 Consolidated" : 
-                   this.scores.overall >= 60 ? "A1 Developing" : "A1 Beginning"
-        };
-    }
-
-    getRecommendation(topic) {
-        const recommendations = {
-            "verb_to_be": "Review the conjugation of 'to be' in present simple (am, is, are).",
-            "present_simple": "Practice the third person singular (-s ending) and auxiliary 'do/does'.",
-            "present_continuous": "Review when to use the -ing form and its conjugation.",
-            // Más recomendaciones...
-        };
-        return recommendations[topic] || null;
-    }
-}
-5. Controlador UI (modules/ui-controller.js)
-javascript
-// modules/ui-controller.js
-export class UIController {
-    constructor(container) {
-        this.container = container;
-        this.elements = {};
-        this.currentView = null;
-    }
-
-    renderWelcomeScreen() {
-        this.currentView = 'welcome';
-        this.container.innerHTML = `
-            <div class="welcome-screen">
-                <h1>English Assessment</h1>
-                <p>Comprehensive A1/A2 Level Test</p>
-                <div class="level-selection">
-                    <button data-level="A1" class="btn-primary">A1 Assessment</button>
-                    <button data-level="A2" class="btn-primary">A2 Assessment</button>
-                </div>
-                <div class="instructions">
-                    <h3>What to expect:</h3>
-                    <ul>
-                        <li>90-120 questions covering grammar, vocabulary, reading</li>
-                        <li>Approximately 45-60 minutes</li>
-                        <li>Detailed results with diagnostic feedback</li>
-                        <li>Progress is saved automatically</li>
-                    </ul>
-                </div>
-            </div>
-        `;
-
-        // Event listeners
-        this.container.querySelectorAll('[data-level]').forEach(btn => {
-            btn.addEventListener('click', () => this.startAssessment(btn.dataset.level));
-        });
-    }
-
-    renderQuestion(question, progress, index) {
-        this.currentView = 'question';
-        this.container.innerHTML = `
-            <div class="question-container">
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${progress.percentage}%"></div>
-                    <span class="progress-text">${Math.round(progress.percentage)}%</span>
-                </div>
-                
-                <div class="question-meta">
-                    <span class="section-tag">${question.section.toUpperCase()}</span>
-                    <span class="question-counter">Question ${index + 1} of ${progress.total}</span>
-                </div>
-
-                <div class="question-content">
-                    <h3>${question.question}</h3>
-                    ${this.renderQuestionType(question)}
-                </div>
-
-                <div class="navigation">
-                    <button id="prev-btn" class="btn-secondary" ${index === 0 ? 'disabled' : ''}>
-                        ← Previous
-                    </button>
-                    <button id="next-btn" class="btn-primary">
-                        ${index === progress.total - 1 ? 'Review & Submit' : 'Next →'}
-                    </button>
-                </div>
-            </div>
-        `;
-
-        this.attachQuestionListeners(question);
-    }
-
-    renderQuestionType(question) {
-        switch(question.type) {
-            case 'multiple_choice':
-                return `
-                    <div class="options">
-                        ${question.options.map((opt, i) => `
-                            <label class="option">
-                                <input type="radio" name="question" value="${String.fromCharCode(65 + i)}">
-                                <span>${String.fromCharCode(65 + i)}. ${opt}</span>
-                            </label>
-                        `).join('')}
-                    </div>
-                `;
-            case 'fill_blank':
-                return `
-                    <div class="fill-blank">
-                        <input type="text" placeholder="Type your answer..." class="text-input">
-                    </div>
-                `;
-            default:
-                return '<p>Question type not supported</p>';
-        }
-    }
-
-    renderResults(results, diagnostic) {
-        this.currentView = 'results';
-        this.container.innerHTML = `
-            <div class="results-container">
-                <h2>Your English Assessment Results</h2>
-                
-                <div class="overall-result">
-                    <div class="score-circle">
-                        <span class="score-number">${Math.round(results.overall)}%</span>
-                        <span class="score-label">Overall Score</span>
-                    </div>
-                    <div class="level-result">
-                        <span class="level-badge">${diagnostic.level}</span>
-                    </div>
-                </div>
-
-                <div class="section-scores">
-                    <h3>Performance by Section</h3>
-                    ${this.renderSectionScores(results)}
-                </div>
-
-                <div class="diagnostic-feedback">
-                    <div class="strengths">
-                        <h4>💪 Strengths</h4>
-                        <ul>${diagnostic.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
-                    </div>
-                    <div class="weaknesses">
-                        <h4>📚 Areas for Improvement</h4>
-                        <ul>${diagnostic.weaknesses.map(w => `<li>${w}</li>`).join('')}</ul>
-                    </div>
-                    <div class="recommendations">
-                        <h4>📝 Recommendations</h4>
-                        <ul>${diagnostic.recommendations.map(r => `<li>${r}</li>`).join('')}</ul>
-                    </div>
-                </div>
-
-                <div class="actions no-print">
-                    <button onclick="window.print()" class="btn-primary">Print / Save as PDF</button>
-                    <button id="restart-btn" class="btn-secondary">Take Another Test</button>
-                </div>
-            </div>
-        `;
-
-        document.getElementById('restart-btn').addEventListener('click', () => {
-            localStorage.removeItem('assessment_progress');
-            this.renderWelcomeScreen();
-        });
-    }
-}
-6. Aplicación Principal (app.js)
-javascript
-// app.js
-import { A1_QUESTIONS } from './data/a1-questions.js';
-import { A2_QUESTIONS } from './data/a2-questions.js';
-import { AssessmentEngine } from './modules/assessment-engine.js';
-import { ScoringEngine } from './modules/scoring-engine.js';
-import { DiagnosticEngine } from './modules/diagnostic-engine.js';
-import { UIController } from './modules/ui-controller.js';
-
-class App {
-    constructor() {
-        this.ui = new UIController(document.getElementById('app'));
-        this.engine = null;
-        this.currentLevel = null;
-        
-        this.init();
-    }
-
-    init() {
-        this.ui.renderWelcomeScreen();
-        this.setupEventListeners();
-    }
-
-    setupEventListeners() {
-        document.addEventListener('startAssessment', (e) => {
-            this.startAssessment(e.detail.level);
-        });
-    }
-
-    startAssessment(level) {
-        this.currentLevel = level;
-        const questions = level === 'A1' ? A1_QUESTIONS : A2_QUESTIONS;
-        
-        this.engine = new AssessmentEngine(questions.questions);
-        
-        // Cargar progreso guardado
-        this.engine.loadProgress();
-        
-        this.showQuestion();
-    }
-
-    showQuestion() {
-        const current = this.engine.getCurrentQuestion();
-        const progress = this.engine.getProgress();
-        const index = this.engine.currentIndex;
-        
-        this.ui.renderQuestion(current, progress, index);
-    }
-
-    submitAssessment() {
-        const scores = new ScoringEngine(
-            this.engine.questions,
-            this.engine.answers
-        ).calculateScore();
-        
-        const diagnostic = new DiagnosticEngine(
-            scores,
-            this.engine.questions
-        ).generateDiagnostic();
-        
-        this.ui.renderResults(scores, diagnostic);
-    }
-}
-
-// Inicializar
-document.addEventListener('DOMContentLoaded', () => {
-    const app = new App();
-    window.app = app;
-});
-7. Estilos CSS (styles.css)
-css
-/* styles.css */
-:root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-700: #374151;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-#app {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    max-width: 800px;
-    width: 100%;
-    min-height: 600px;
-    padding: 40px;
-    position: relative;
-}
-
-/* Welcome Screen */
-.welcome-screen {
-    text-align: center;
-}
-
-.welcome-screen h1 {
-    font-size: 2.5rem;
-    color: #1a202c;
-    margin-bottom: 10px;
-}
-
-.level-selection {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin: 30px 0;
-}
-
-.btn-primary, .btn-secondary {
-    padding: 12px 32px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-primary {
-    background: var(--primary);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-}
-
-.btn-secondary {
-    background: var(--gray-200);
-    color: var(--gray-700);
-}
-
-.btn-secondary:hover {
-    background: var(--gray-300);
-}
-
-/* Question Container */
-.question-container {
-    animation: fadeIn 0.5s ease;
-}
-
-.progress-bar {
-    background: var(--gray-200);
-    border-radius: 10px;
-    height: 8px;
-    margin-bottom: 30px;
-    position: relative;
-}
-
-.progress-fill {
-    background: linear-gradient(90deg, var(--primary), #7c3aed);
-    height: 100%;
-    border-radius: 10px;
-    transition: width 0.5s ease;
-}
-
-.progress-text {
-    position: absolute;
-    right: 0;
-    top: -20px;
-    font-size: 0.875rem;
-    color: var(--gray-700);
-}
-
-.question-meta {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.section-tag {
-    background: var(--primary);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.options {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin: 20px 0;
-}
-
-.option {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    border: 2px solid var(--gray-200);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.option:hover {
-    border-color: var(--primary);
-    background: #f8fafc;
-}
-
-.option input[type="radio"] {
-    margin-right: 12px;
-}
-
-.option.selected {
-    border-color: var(--primary);
-    background: #eff6ff;
-}
-
-/* Results */
-.results-container {
-    animation: fadeIn 0.5s ease;
-}
-
-.overall-result {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 40px;
-    margin: 30px 0;
-    padding: 30px;
-    background: var(--gray-100);
-    border-radius: 12px;
-}
-
-.score-circle {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: conic-gradient(var(--primary) 0deg, var(--primary) ${(score) => (score/100)*360}deg, var(--gray-200) ${(score/100)*360}deg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.score-number {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--gray-700);
-}
-
-.score-label {
-    font-size: 0.75rem;
-    color: var(--gray-700);
-}
-
-.level-badge {
-    font-size: 1.5rem;
-    font-weight: 700;
-    padding: 12px 24px;
-    border-radius: 30px;
-}
-
-.level-badge.consolidated { background: var(--success); color: white; }
-.level-badge.developing { background: var(--warning); color: white; }
-.level-badge.beginning { background: var(--danger); color: white; }
-
-.section-scores {
-    margin: 30px 0;
-}
-
-.section-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 8px 0;
-}
-
-.section-bar-label {
-    width: 120px;
-    font-weight: 600;
-}
-
-.section-bar-track {
-    flex: 1;
-    height: 8px;
-    background: var(--gray-200);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.section-bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 1s ease;
-}
-
-.section-bar-fill.high { background: var(--success); }
-.section-bar-fill.medium { background: var(--warning); }
-.section-bar-fill.low { background: var(--danger); }
-
-.diagnostic-feedback {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin: 30px 0;
-}
-
-.diagnostic-feedback ul {
-    list-style: none;
-    padding: 0;
-}
-
-.diagnostic-feedback li {
-    padding: 6px 0;
-    border-bottom: 1px solid var(--gray-200);
-}
-
-/* Print Styles */
-@media print {
-    body {
-        background: white;
-        padding: 0;
-    }
-    
-    #app {
-        box-shadow: none;
-        padding: 20px;
-        border-radius: 0;
-    }
-    
-    .no-print {
-        display: none !important;
-    }
-    
-    .btn-primary, .btn-secondary {
-        display: none;
-    }
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-    #app {
-        padding: 20px;
-    }
-    
-    .level-selection {
-        flex-direction: column;
-    }
-    
-    .overall-result {
-        flex-direction: column;
-        gap: 20px;
-    }
-    
-    .diagnostic-feedback {
-        grid-template-columns: 1fr;
-    }
-    
-    .section-bar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .section-bar-label {
-        width: 100%;
-    }
-}
-Próximos Pasos para el Desarrollo
-Fase 1: Preparación Académica (2-3 días)
-Definir el blueprint académico completo
-
-Lista de temas por nivel (A1/A2)
-
-Especificación de subtemas
-
-Distribución de preguntas
-
-Crear la matriz de preguntas
-
-95 preguntas para A1
-
-110 preguntas para A2
-
-Con metadata detallada
-
-Fase 2: Desarrollo Frontend (3-4 días)
-Estructura HTML
-
-Estilos CSS (responsive + print)
-
-Lógica JavaScript modular
-
-Fase 3: Testing y Refinamiento (2 días)
-Probar con usuarios reales
-
-Ajustar thresholds de nivel
-
-Mejorar UI/UX
-
-Fase 4: Publicación en GitHub Pages (1 día)
-Configurar repositorio
-
-Desplegar
-
-Compartir con usuarios beta
-
-Este enfoque te permitirá tener una herramienta funcional, completa y autónoma que realmente pueda evaluar el nivel de inglés de las personas sin necesidad de infraestructura compleja.
+```
+
+---
+
+# 37. Fuentes de audio
+
+Mi primera recomendación para el **audio principal de los tests** es:
+
+### Opción 1 — Crear nuestros propios audios
+
+Es la mejor opción.
+
+Podemos escribir un script:
+
+```text
+A2 conversation
+Speaker A
+Speaker B
+```
+
+y grabarlo nosotros o mediante colaboradores.
+
+Ventajas:
+
+* control absoluto;
+* contenido creado específicamente para el test;
+* podemos controlar vocabulario;
+* podemos controlar velocidad;
+* podemos controlar acento;
+* evitamos depender de terceros.
+
+### Opción 2 — TTS
+
+También podemos generar audio con un servicio de Text-to-Speech, pero debemos guardar evidencia de los términos comerciales del servicio utilizado.
+
+### Opción 3 — repositorios externos
+
+Para sonidos ambientales o efectos podemos estudiar Pixabay/Freesound y revisar **la licencia de cada recurso** antes de incorporarlo.
+
+No asumir que "gratis" significa automáticamente "sin restricciones".
+
+---
+
+# 38. Sprint 5.1 — Listening A1/A2
+
+Crear audios cortos.
+
+Ejemplos:
+
+```text
+introductions
+shopping
+family
+daily routine
+directions
+food
+school
+weather
+```
+
+---
+
+# 39. Sprint 5.2 — Listening B1/B2
+
+Situaciones más naturales:
+
+```text
+interviews
+travel
+work
+news-like reports
+discussions
+phone conversations
+presentations
+```
+
+---
+
+# 40. Sprint 5.3 — Listening C1/C2
+
+Mayor naturalidad:
+
+```text
+debates
+lectures
+interviews
+complex discussions
+abstract topics
+different registers
+```
+
+---
+
+# 41. FASE 6 — Images
+
+Las imágenes serán un recurso complementario, no decoración.
+
+Deben tener una función pedagógica.
+
+Ejemplos:
+
+```text
+Image → vocabulary
+Image → identify action
+Image → describe situation
+Image → infer meaning
+Image → contextual grammar
+```
+
+---
+
+# 42. Fuentes de imágenes
+
+### Pexels
+
+Muy útil porque ofrece fotografías y vídeos. Su licencia permite uso gratuito, incluyendo uso comercial, aunque existen restricciones sobre personas identificables, marcas, redistribución y otros usos.
+
+[Pexels](https://www.pexels.com/?utm_source=chatgpt.com)
+
+### Unsplash
+
+Excelente para fotografías.
+
+Su licencia permite descargar y utilizar las imágenes gratuitamente, incluso con fines comerciales, aunque tiene restricciones específicas y no debemos asumir que los elementos representados —por ejemplo marcas o personas— carecen de derechos adicionales.
+
+[Unsplash](https://unsplash.com/?utm_source=chatgpt.com)
+
+### Pixabay
+
+Puede ser especialmente útil porque dispone de imágenes, vídeos y audio. Su licencia permite utilizar y modificar contenido gratuitamente, pero tiene usos prohibidos y restricciones que debemos revisar.
+
+[Pixabay](https://pixabay.com/?utm_source=chatgpt.com)
+
+---
+
+# 43. Regla para assets
+
+Nunca hacer esto:
+
+```text
+download image
+rename image
+put into project
+```
+
+sin registrar de dónde salió.
+
+Crear:
+
+```text
+/docs/assets-registry.csv
+```
+
+Ejemplo:
+
+```text
+asset_id
+type
+filename
+source
+original_url
+creator
+license
+date_downloaded
+modifications
+notes
+```
+
+Esto será extremadamente útil cuando el proyecto empiece a generar dinero.
+
+---
+
+# 44. FASE 7 — Video
+
+No necesitamos vídeos en la primera versión del Diagnostic.
+
+Primero:
+
+```text
+Images
+Audio
+```
+
+Después podemos incorporar vídeo en ejercicios específicos.
+
+Pexels permite utilizar sus vídeos gratuitamente, incluso para sitios web y proyectos comerciales, sujeto a sus restricciones de licencia.
+
+Pixabay también dispone de vídeo bajo su licencia de contenido.
+
+La recomendación técnica para mantener la página ligera:
+
+**no descargar vídeos enormes si simplemente podemos usar una imagen o un audio.**
+
+---
+
+# 45. FASE 8 — Vocabulary Practice
+
+## Sprint 8.1
+
+Crear:
+
+```text
+A1 Vocabulary
+A2 Vocabulary
+B1 Vocabulary
+B2 Vocabulary
+C1 Vocabulary
+C2 Vocabulary
+```
+
+---
+
+# 46. Sprint 8.2 — Vocabulary Topics
+
+Crear categorías.
+
+Ejemplo:
+
+```text
+A1
+├── Family
+├── Food
+├── Numbers
+├── Colors
+├── Home
+├── School
+└── Daily routines
+```
+
+B1:
+
+```text
+├── Work
+├── Travel
+├── Relationships
+├── Technology
+├── Environment
+├── Education
+├── Society
+└── Phrasal verbs
+```
+
+C1/C2:
+
+```text
+├── Academic
+├── Professional
+├── Abstract concepts
+├── Collocations
+├── Idioms
+├── Nuance
+└── Register
+```
+
+---
+
+# 47. Sprint 8.3 — Practice Modes
+
+Primera versión:
+
+```text
+Multiple choice
+Matching
+Image choice
+Fill in the blank
+```
+
+Posteriormente:
+
+```text
+Flashcards
+Timed challenge
+Word ordering
+Definition matching
+Context challenge
+```
+
+---
+
+# 48. FASE 9 — UX/UI
+
+## Sprint 9.1
+
+Mobile first.
+
+La mayoría de usuarios debe poder realizar el test cómodamente desde:
+
+```text
+phone
+tablet
+desktop
+```
+
+---
+
+# 49. Sprint 9.2 — Test Experience
+
+Cada pregunta debe mostrar:
+
+```text
+Question 12 of 40
+
+Grammar
+Past Simple
+
+[ question ]
+
+[ answer ]
+
+          NEXT →
+```
+
+Evitar pantallas saturadas.
+
+---
+
+# 50. Sprint 9.3 — Feedback
+
+En Practice:
+
+```text
+Correct!
+```
+
+y explicación.
+
+En Diagnostic:
+
+evitar revelar constantemente la respuesta porque puede afectar la evaluación.
+
+---
+
+# 51. Sprint 9.4 — Results
+
+Diseñar resultados visuales pero ligeros.
+
+No necesitamos gráficos gigantes.
+
+CSS puede hacer:
+
+```text
+████████░░ 80%
+```
+
+o barras sencillas.
+
+---
+
+# 52. FASE 10 — Accessibility
+
+Revisar:
+
+* teclado;
+* contraste;
+* labels;
+* focus;
+* screen readers;
+* tamaños de texto;
+* botones;
+* audio controls;
+* errores de formularios.
+
+No debe depender únicamente del color.
+
+---
+
+# 53. FASE 11 — Performance
+
+Objetivo:
+
+> La página debe sentirse instantánea.
+
+Reglas:
+
+### Images
+
+Usar:
+
+```text
+WebP
+AVIF
+```
+
+cuando sea conveniente.
+
+Evitar:
+
+```text
+5 MB JPG
+```
+
+para una imagen de 300 KB.
+
+### Audio
+
+Preferentemente:
+
+```text
+MP3 / OGG
+```
+
+con bitrate razonable.
+
+No utilizar audio de alta fidelidad innecesario.
+
+### JavaScript
+
+Sin librerías pesadas.
+
+### Data
+
+No cargar los 5.000 ejercicios cuando el usuario solamente está haciendo A2.
+
+---
+
+# 54. FASE 12 — Testing
+
+Crear una matriz:
+
+```text
+Feature
+Desktop
+Mobile
+Chrome
+Firefox
+Safari
+Edge
+```
+
+Y además pruebas:
+
+```text
+Question rendering
+Scoring
+Navigation
+Back button
+Refresh
+Incomplete test
+Audio
+Results
+LocalStorage
+```
+
+---
+
+# 55. FASE 13 — Local Storage
+
+Sin cuentas.
+
+Podemos guardar localmente:
+
+```text
+last diagnostic
+practice scores
+completed tests
+preferences
+```
+
+mediante `localStorage`.
+
+No necesitamos base de datos.
+
+---
+
+# 56. FASE 14 — SEO
+
+Crear páginas indexables:
+
+```text
+/english-levels
+/a1-english-test
+/a2-english-test
+/b1-english-test
+/b2-english-test
+/c1-english-test
+/c2-english-test
+/vocabulary-practice
+```
+
+Y contenido útil:
+
+```text
+What is A2 English?
+What can a B1 English speaker do?
+B2 English level explained
+```
+
+Esto puede ser importante para conseguir tráfico orgánico.
+
+---
+
+# 57. FASE 15 — GitHub Pages
+
+Primera publicación real.
+
+Checklist:
+
+```text
+HTTPS
+404 page
+favicon
+robots.txt
+sitemap.xml
+mobile
+performance
+audio
+images
+tests
+```
+
+---
+
+# 58. FASE 16 — Hosting alternativo
+
+Una vez que la aplicación funcione:
+
+La arquitectura debería permitir copiar:
+
+```text
+HTML
+CSS
+JS
+JSON
+assets
+```
+
+a otro hosting estático sin modificar prácticamente nada.
+
+La aplicación no debe depender de:
+
+```text
+GitHub API
+GitHub database
+GitHub Actions
+```
+
+para funcionar.
+
+GitHub Pages será simplemente:
+
+> el primer servidor estático.
+
+---
+
+# 59. FASE 17 — Analytics
+
+Solo después de tener el producto estable.
+
+Medir:
+
+```text
+visits
+test starts
+test completions
+completion rate
+most popular level
+most popular practice
+device
+country
+```
+
+Evitar recopilar información personal innecesaria.
+
+---
+
+# 60. FASE 18 — Monetization
+
+La publicidad entra **después** de que el producto funcione.
+
+Primero:
+
+```text
+Product
+↓
+Quality
+↓
+Traffic
+↓
+Retention
+↓
+Analytics
+↓
+Ads
+```
+
+Nunca:
+
+```text
+Ads
+↓
+User experience
+```
+
+---
+
+# 61. Diseño publicitario futuro
+
+Reservar espacios conceptualmente:
+
+```text
+[ Advertisement ]
+```
+
+pero no cargar publicidad durante el desarrollo inicial.
+
+Posiciones futuras:
+
+```text
+Home
+Results
+Practice
+Level information
+```
+
+Evitar:
+
+```text
+ad between every question
+```
+
+Especialmente en móvil.
+
+---
+
+# 62. FASE 19 — Content Expansion
+
+Una vez validado el sistema:
+
+```text
+A1: 200+ questions
+A2: 250+ questions
+B1: 300+ questions
+B2: 300+ questions
+C1: 300+ questions
+C2: 300+ questions
+```
+
+No son objetivos obligatorios iniciales.
+
+Son una meta de crecimiento.
+
+---
+
+# 63. Content pipeline
+
+Cada pregunta debe pasar por:
+
+```text
+Draft
+ ↓
+Self-review
+ ↓
+Level review
+ ↓
+Answer validation
+ ↓
+Language review
+ ↓
+Technical validation
+ ↓
+Published
+```
+
+Metadata:
+
+```text
+status:
+draft
+review
+approved
+published
+retired
+```
+
+---
+
+# 64. Content IDs
+
+Nunca usar:
+
+```text
+question1
+question2
+question3
+```
+
+Preferir:
+
+```text
+A1-GRAMMAR-001
+A1-GRAMMAR-002
+
+B1-READING-014
+
+C2-VOCAB-087
+```
+
+Esto facilita mantenimiento.
+
+---
+
+# 65. Versionado
+
+Si una pregunta cambia:
+
+```text
+A2-GRAMMAR-027
+version: 2
+```
+
+No eliminar inmediatamente el historial.
+
+Esto será importante cuando haya muchos tests y resultados.
+
+---
+
+# 66. FASE 20 — Question Quality Review
+
+Cuando tengamos usuarios reales, revisar:
+
+```text
+Questions with unusually high failure
+Questions with unusually high success
+Questions frequently skipped
+Questions with ambiguous answers
+Questions with multiple accepted answers
+```
+
+Una pregunta que estadísticamente se comporta mal debe revisarse.
+
+---
+
+# 67. Futuro: Adaptive Diagnostic
+
+No implementarlo al principio.
+
+Pero diseñar la arquitectura para poder hacerlo.
+
+Conceptualmente:
+
+```text
+Start
+ ↓
+A1/A2 questions
+ ↓
+performance
+ ↓
+B1 questions
+ ↓
+performance
+ ↓
+B2 questions
+ ↓
+performance
+ ↓
+estimate
+```
+
+Esto podría hacer que el diagnóstico sea:
+
+* más corto;
+* más preciso;
+* más interesante.
+
+---
+
+# 68. Futuro: Speaking
+
+También debe quedar fuera del MVP.
+
+Pero reservar la posibilidad.
+
+Más adelante:
+
+```text
+Speaking
+```
+
+podría utilizar:
+
+* grabación de audio;
+* tareas;
+* prompts;
+* evaluación manual o asistida.
+
+No debemos prometer una evaluación automática fiable de speaking simplemente porque el navegador pueda grabar audio.
+
+---
+
+# 69. Roadmap resumido por sprints
+
+```text
+SPRINT 0
+Product specification
+
+SPRINT 1
+CEFR + skills + levels
+
+SPRINT 2
+Question schema + architecture
+
+SPRINT 3
+Question engine
+
+SPRINT 4
+A1/A2 content
+
+SPRINT 5
+B1/B2 content
+
+SPRINT 6
+C1/C2 content
+
+SPRINT 7
+Diagnostic engine
+
+SPRINT 8
+Diagnostic results
+
+SPRINT 9
+A1/A2 full tests
+
+SPRINT 10
+B1/B2 full tests
+
+SPRINT 11
+C1/C2 full tests
+
+SPRINT 12
+Listening
+
+SPRINT 13
+Images + multimedia
+
+SPRINT 14
+Vocabulary Practice
+
+SPRINT 15
+UX/UI
+
+SPRINT 16
+Accessibility
+
+SPRINT 17
+Performance
+
+SPRINT 18
+Testing / QA
+
+SPRINT 19
+SEO
+
+SPRINT 20
+GitHub Pages launch
+
+SPRINT 21
+Analytics
+
+SPRINT 22
+Content expansion
+
+SPRINT 23
+Traffic optimization
+
+SPRINT 24
+Advertising preparation
+
+SPRINT 25
+Monetization
+```
+
+---
+
+# 70. Qué NO debemos construir todavía
+
+Para mantener el proyecto ligero:
+
+```text
+NO React
+NO Vue
+NO Angular
+NO Node backend
+NO SQL
+NO Firebase
+NO authentication
+NO user accounts
+NO payment system
+NO complicated CMS
+NO AI API
+NO unnecessary libraries
+```
+
+Todo eso puede llegar posteriormente si realmente lo necesitamos.
+
+---
+
+# 71. MVP recomendado
+
+El primer lanzamiento no debe intentar tener todo.
+
+El MVP debería ser:
+
+```text
+Home
+│
+├── Diagnostic Test
+│
+├── A1 Test
+├── A2 Test
+├── B1 Test
+├── B2 Test
+├── C1 Test
+├── C2 Test
+│
+├── Vocabulary Practice
+│
+└── English Levels
+```
+
+Con:
+
+```text
+✓ Grammar
+✓ Vocabulary
+✓ Reading
+✓ Listening
+✓ Use of English
+✓ Writing
+✓ Images
+✓ Results
+✓ Mobile
+✓ GitHub Pages
+```
+
+Pero con una cantidad inicial de contenido controlada.
+
+---
+
+# 72. Estrategia de contenido
+
+Tú puedes encargarte manualmente de:
+
+```text
+questions
+audio
+images
+videos
+```
+
+Pero debemos darte una plantilla muy estricta.
+
+Por ejemplo:
+
+```text
+Question ID:
+Level:
+Skill:
+Topic:
+Difficulty:
+Type:
+
+Instruction:
+
+Question:
+
+Options:
+
+Correct answer:
+
+Accepted answers:
+
+Explanation:
+
+Image:
+
+Audio:
+
+Source:
+
+License:
+
+Reviewer:
+
+Status:
+```
+
+Así el contenido puede crecer independientemente del código.
+
+---
+
+# 73. Política de assets
+
+Crear una carpeta:
+
+```text
+/assets/
+```
+
+pero mantener un registro:
+
+```text
+assets-registry.csv
+```
+
+Ejemplo:
+
+```text
+IMG-A2-014
+image
+travel-airport-01.webp
+Pexels
+original-url
+Pexels License
+2026-08-13
+cropped/resized
+A2 vocabulary
+```
+
+Para cada recurso externo debemos conservar la información de licencia que corresponda.
+
+Esto es especialmente importante porque el proyecto pretende eventualmente tener publicidad.
+
+---
+
+# 74. Mi recomendación para las imágenes
+
+Prioridad:
+
+```text
+1. Imágenes propias
+2. Pexels
+3. Unsplash
+4. Pixabay
+```
+
+Pexels y Unsplash son excelentes para fotografía. Pixabay es particularmente interesante porque también ofrece vídeo y audio. Siempre hay que respetar las condiciones concretas de cada licencia y las restricciones sobre marcas, personas y redistribución.
+
+---
+
+# 75. Mi recomendación para los audios
+
+Prioridad:
+
+```text
+1. Audio creado específicamente para English Tests
+2. TTS con derechos comerciales claramente compatibles
+3. Audio con licencia abierta apropiada
+4. Bibliotecas de sonidos para ambientes/efectos
+```
+
+Para listening educativo prefiero muchísimo la opción 1.
+
+Por ejemplo:
+
+```text
+A2-LISTEN-001
+
+Context:
+At a coffee shop
+
+Speaker 1:
+...
+
+Speaker 2:
+...
+
+Questions:
+1.
+2.
+3.
+```
+
+Así controlamos perfectamente:
+
+* vocabulario;
+* gramática;
+* velocidad;
+* duración;
+* acento;
+* dificultad.
+
+---
+
+# 76. Una regla importante para el contenido
+
+No utilizar vídeos de YouTube de terceros simplemente porque:
+
+> "están disponibles en YouTube".
+
+Para un proyecto que queremos monetizar, debemos tener mucho cuidado con derechos y licencias.
+
+Es preferible:
+
+```text
+video propio
+```
+
+o:
+
+```text
+stock con licencia adecuada
+```
+
+o:
+
+```text
+contenido con licencia abierta compatible
+```
+
+---
+
+# 77. Objetivo técnico final
+
+La arquitectura ideal será:
+
+```text
+                  ENGLISH TESTS
+                       │
+            ┌──────────┴──────────┐
+            │                     │
+       APPLICATION             CONTENT
+            │                     │
+     HTML/CSS/JS             JSON/Assets
+            │                     │
+     ┌──────┼──────┐        ┌─────┼─────┐
+     │      │      │        │     │     │
+  Engine  Scoring Results  Questions Audio Images
+     │
+     └──────────────┐
+                    │
+             Local Storage
+```
+
+Sin backend.
+
+Sin base de datos.
+
+Sin framework.
+
+---
+
+# 78. Objetivo de escalabilidad
+
+La aplicación debe poder pasar de:
+
+```text
+180 questions
+```
+
+a:
+
+```text
+500
+```
+
+a:
+
+```text
+1,000
+```
+
+a:
+
+```text
+5,000+
+```
+
+sin que el código principal se vuelva inmanejable.
+
+La diferencia debe estar principalmente en:
+
+```text
+/data
+```
+
+y:
+
+```text
+/assets
+```
+
+no en `app.js`.
+
+---
+
+# 79. Objetivo de negocio
+
+La evolución ideal sería:
+
+```text
+FASE 1
+Free static website
+
+        ↓
+
+FASE 2
+Useful diagnostic tool
+
+        ↓
+
+FASE 3
+Large question bank
+
+        ↓
+
+FASE 4
+SEO + organic traffic
+
+        ↓
+
+FASE 5
+Returning users through practice
+
+        ↓
+
+FASE 6
+Analytics
+
+        ↓
+
+FASE 7
+Advertising
+
+        ↓
+
+FASE 8
+Revenue
+
+        ↓
+
+FASE 9
+Reinvest into content
+```
+
+El objetivo no es simplemente poner anuncios.
+
+El objetivo es crear una página que la gente **quiera volver a utilizar**.
+
+---
+
+# 80. Criterio para considerar terminado el proyecto
+
+No considero que English Tests esté "terminado" cuando tengamos seis tests.
+
+Lo consideraría listo para una primera versión sólida cuando:
+
+```text
+✓ Diagnostic funciona
+✓ A1–C2 funcionan
+✓ Todas las competencias están contempladas
+✓ Listening funciona
+✓ Preguntas tienen instrucciones claras
+✓ No hay preguntas ambiguas conocidas
+✓ Resultados son comprensibles
+✓ Vocabulary Practice funciona
+✓ Level information funciona
+✓ Mobile funciona
+✓ Accesibilidad básica funciona
+✓ Página carga rápido
+✓ No depende de backend
+✓ Se puede desplegar en GitHub Pages
+✓ Assets tienen registro de licencia
+✓ El banco de preguntas puede crecer sin modificar el motor
+✓ Hay pruebas manuales y técnicas
+```
+
+---
+
+# 81. El principio que debería guiar todo el proyecto
+
+**Separar código, contenido y recursos.**
+
+```text
+CODE
+    Cómo funciona.
+
+CONTENT
+    Qué pregunta hacemos.
+
+ASSETS
+    Qué imagen/audio/video utilizamos.
+
+CONFIGURATION
+    Cómo construimos cada test.
+```
+
+Si mantenemos esta separación desde ahora, podremos cambiar completamente el contenido de English Tests durante años sin tener que reconstruir la aplicación.
+
+---
+
+# 82. Orden real de ejecución
+
+No empezaría creando A1–C2 completos inmediatamente.
+
+Haría:
+
+```text
+1. Arquitectura
+2. Question schema
+3. Question engine
+4. Scoring prototype
+5. 10–20 preguntas A1
+6. 10–20 preguntas A2
+7. Diagnostic prototype
+8. Results
+9. Listening prototype
+10. Image prototype
+11. Validar UX
+12. Recién entonces escalar contenido
+```
+
+Esto evita uno de los errores más costosos:
+
+> crear 1.000 preguntas y descubrir después que el motor o el modelo de scoring estaba mal diseñado.
+
+---
+
+# 83. Meta del primer gran milestone
+
+El primer objetivo serio debería ser:
+
+## English Tests V1 — Functional Core
+
+```text
+Diagnostic A1–C2
++
+Skill scoring
++
+A1–C2 Full Tests
++
+Listening
++
+Basic images
++
+Vocabulary Practice
++
+Results
++
+Mobile
++
+GitHub Pages
+```
+
+No necesitamos todavía:
+
+```text
+accounts
+AI
+speaking
+gamification avanzada
+ads
+database
+backend
+```
+
