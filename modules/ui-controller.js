@@ -3,6 +3,15 @@
 
 import { QUESTION_BANK, SECTION_LABELS, TOPIC_LABELS } from '../data/question-bank.js';
 import { getSavedProgress, buildDiagnosticQuestions, MODES, MODE_LABELS } from './assessment-engine.js';
+import { SPRINTS, getSprintSummary } from './sprint-roadmap.js';
+import { getAllTestConfigs } from './test-config.js';
+import { getAudioAssetsForLevel, getAssetRegistry } from './media-assets.js';
+import { getAllLevelTestPlans } from './full-test-plan.js';
+import { getPracticeTopics, getPracticeModes } from './practice-engine.js';
+import { getUxChecklist, getQAMatrix } from './ux-quality.js';
+import { getReleaseSteps, getLaunchChecklist } from './release-plan.js';
+import { QUESTION_SCHEMA, QUESTION_TYPE_META } from './question-schema.js';
+import { getAllTemplates } from './question-templates.js';
 
 export class UIController {
     constructor(container, actions) {
@@ -28,6 +37,19 @@ export class UIController {
         const levels = ['A1', 'A2', 'B1'];
         const subs = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate' };
 
+        const sprintSummary = getSprintSummary();
+        const configs = getAllTestConfigs();
+        const audioLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+        const assetRegistry = getAssetRegistry();
+        const levelPlans = getAllLevelTestPlans();
+        const practiceModes = getPracticeModes();
+        const uxChecklist = getUxChecklist();
+        const qaMatrix = getQAMatrix();
+        const releaseSteps = getReleaseSteps();
+        const launchChecklist = getLaunchChecklist();
+        const schemas = Object.keys(QUESTION_TYPE_META);
+        const templates = getAllTemplates();
+
         this.container.innerHTML = `
             <div class="welcome-screen">
                 <div class="welcome-badge"><span class="dot"></span> ENGLISH ASSESSMENT</div>
@@ -37,7 +59,7 @@ export class UIController {
                 <div class="stats-row">
                     <div class="stat-item"><div class="stat-number">3</div><div class="stat-label">Levels</div></div>
                     <div class="stat-item"><div class="stat-number">${QUESTION_BANK.A1.length + QUESTION_BANK.A2.length + QUESTION_BANK.B1.length}</div><div class="stat-label">Questions</div></div>
-                    <div class="stat-item"><div class="stat-number">6</div><div class="stat-label">Question types</div></div>
+                    <div class="stat-item"><div class="stat-number">${QUESTION_SCHEMA.supportedTypes.length}</div><div class="stat-label">Question types</div></div>
                 </div>
 
                 <div class="level-selection">
@@ -59,6 +81,200 @@ export class UIController {
                         <li><span class="icon">📊</span> At the end: overall score, level badge and a <strong>detailed topic-by-topic diagnosis</strong> with study recommendations.</li>
                         <li><span class="icon">🖨️</span> You can <strong>print or save the result as PDF</strong>.</li>
                     </ul>
+                </div>
+
+                <div class="media-panel">
+                    <div class="roadmap-header">
+                        <div>
+                            <span class="section-tag">Media architecture</span>
+                            <h3>Listening, image and asset management</h3>
+                        </div>
+                    </div>
+
+                    <div class="media-cards">
+                        <div class="media-card">
+                            <h4>🎧 Listening library</h4>
+                            <ul>
+                                ${audioLevels.map(level => `<li><strong>${level}</strong> · ${getAudioAssetsForLevel(level).length} assets</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="media-card">
+                            <h4>🖼️ Image registry</h4>
+                            <ul>
+                                <li><strong>Image tasks</strong> ready for image choice, description and context</li>
+                                <li><strong>Asset count</strong> · ${assetRegistry.length}</li>
+                            </ul>
+                        </div>
+                        <div class="media-card">
+                            <h4>📦 Licensing</h4>
+                            <ul>
+                                <li><strong>Registry</strong> tracks source, creator, license and notes</li>
+                                <li><strong>Compliance</strong> built in from the first sprint</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="media-panel">
+                    <div class="roadmap-header">
+                        <div>
+                            <span class="section-tag">Full tests</span>
+                            <h3>A1–C2 coverage plan</h3>
+                        </div>
+                    </div>
+
+                    <div class="media-cards">
+                        ${levelPlans.map(plan => `
+                            <div class="media-card">
+                                <h4>${plan.label}</h4>
+                                <ul>
+                                    <li><strong>Complexity:</strong> ${plan.complexity}</li>
+                                    <li><strong>Focus:</strong> ${plan.focus.join(', ')}</li>
+                                </ul>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="media-panel">
+                    <div class="roadmap-header">
+                        <div>
+                            <span class="section-tag">Practice</span>
+                            <h3>Vocabulary and guided activities</h3>
+                        </div>
+                    </div>
+
+                    <div class="media-cards">
+                        <div class="media-card">
+                            <h4>📚 Topics by level</h4>
+                            <ul>
+                                ${['A1', 'A2', 'B1'].map(level => `<li><strong>${level}</strong> · ${getPracticeTopics(level).slice(0, 3).join(', ')}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="media-card">
+                            <h4>🎯 Practice modes</h4>
+                            <ul>
+                                ${practiceModes.slice(0, 5).map(mode => `<li>${mode}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="media-panel">
+                    <div class="roadmap-header">
+                        <div>
+                            <span class="section-tag">Quality</span>
+                            <h3>UX / mobile / accessibility / QA</h3>
+                        </div>
+                    </div>
+
+                    <div class="media-cards">
+                        <div class="media-card">
+                            <h4>🎨 UX</h4>
+                            <ul>
+                                ${uxChecklist.ui.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="media-card">
+                            <h4>📱 Mobile</h4>
+                            <ul>
+                                ${uxChecklist.mobile.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="media-card">
+                            <h4>♿ A11y / QA</h4>
+                            <ul>
+                                ${qaMatrix.slice(0, 4).map(item => `<li><strong>${item.area}</strong> · ${item.status}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="media-panel">
+                    <div class="roadmap-header">
+                        <div>
+                            <span class="section-tag">Question schema</span>
+                            <h3>Dynamic tasks and richer question types</h3>
+                        </div>
+                    </div>
+
+                    <div class="media-cards">
+                        <div class="media-card">
+                            <h4>🧩 Supported types</h4>
+                            <ul>
+                                ${schemas.slice(0, 6).map(type => `<li>${type}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="media-card">
+                            <h4>📝 Template examples</h4>
+                            <ul>
+                                ${templates.slice(0, 4).map(t => `<li>${t.type}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="media-card">
+                            <h4>📌 Rule</h4>
+                            <ul>
+                                <li>No audio/video by default</li>
+                                <li>Images are contextual, not decorative</li>
+                                <li>Questions become richer and more varied</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="media-panel">
+                    <div class="roadmap-header">
+                        <div>
+                            <span class="section-tag">Release</span>
+                            <h3>GitHub Pages launch plan</h3>
+                        </div>
+                    </div>
+
+                    <div class="media-cards">
+                        <div class="media-card">
+                            <h4>🚀 Release steps</h4>
+                            <ul>
+                                ${releaseSteps.map(step => `<li><strong>${step.step}.</strong> ${step.title}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="media-card">
+                            <h4>✅ Launch checklist</h4>
+                            <ul>
+                                ${launchChecklist.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="roadmap-panel">
+                    <div class="roadmap-header">
+                        <div>
+                            <span class="section-tag">Roadmap by sprint</span>
+                            <h3>README implementation plan</h3>
+                        </div>
+                        <div class="roadmap-summary">
+                            <span>${sprintSummary.done} / ${sprintSummary.total} completed</span>
+                        </div>
+                    </div>
+
+                    <div class="roadmap-metrics">
+                        <div class="metric-pill"><strong>${sprintSummary.done}</strong> done</div>
+                        <div class="metric-pill"><strong>${sprintSummary.planned}</strong> planned</div>
+                        <div class="metric-pill"><strong>${configs.length}</strong> test configs</div>
+                    </div>
+
+                    <div class="roadmap-grid">
+                        ${SPRINTS.map(sprint => `
+                            <div class="sprint-card ${sprint.status}">
+                                <div class="sprint-top">
+                                    <span class="sprint-number">S${sprint.id}</span>
+                                    <span class="sprint-status">${sprint.status === 'done' ? '✅ done' : '🗓 planned'}</span>
+                                </div>
+                                <h4>${sprint.title}</h4>
+                                <p>${sprint.summary}</p>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
 
                 <p class="privacy-note">🔒 Your answers never leave this device.</p>
@@ -297,6 +513,13 @@ export class UIController {
                 return this.renderReading(question, selectedAnswer);
             case 'fill_blank':
                 return this.renderFillBlank(question, selectedAnswer);
+            case 'open_answer':
+                return this.renderOpenAnswer(question, selectedAnswer);
+            case 'image_description':
+                return this.renderImageDescription(question, selectedAnswer);
+            case 'image_choice':
+            case 'image_context':
+                return this.renderImageChoice(question, selectedAnswer);
             case 'matching':
                 return this.renderMatching(question, selectedAnswer);
             case 'ordering':
@@ -338,6 +561,68 @@ export class UIController {
                     autocomplete="off" autocorrect="off" spellcheck="false">
             </div>
         `;
+    }
+
+    renderOpenAnswer(question, selectedAnswer) {
+        return `
+            <h3 class="question-text">${this.esc(question.question)}</h3>
+            <div class="fill-blank">
+                <input type="text"
+                    class="text-input"
+                    id="fill-answer"
+                    placeholder="Write a short answer..."
+                    value="${this.esc(selectedAnswer || '')}"
+                    autocomplete="off" autocorrect="off" spellcheck="false">
+            </div>
+        `;
+    }
+
+    renderImageDescription(question, selectedAnswer) {
+        return `
+            <div class="reading-passage">
+                <div class="reading-title">Image prompt</div>
+                <p>${this.esc(this.getImagePrompt(question.image))}</p>
+            </div>
+            <h3 class="question-text">${this.esc(question.question)}</h3>
+            <div class="fill-blank">
+                <input type="text"
+                    class="text-input"
+                    id="fill-answer"
+                    placeholder="Describe briefly..."
+                    value="${this.esc(selectedAnswer || '')}"
+                    autocomplete="off" autocorrect="off" spellcheck="false">
+            </div>
+        `;
+    }
+
+    renderImageChoice(question, selectedAnswer) {
+        return `
+            <div class="reading-passage">
+                <div class="reading-title">Image prompt</div>
+                <p>${this.esc(this.getImagePrompt(question.image))}</p>
+            </div>
+            <h3 class="question-text">${this.esc(question.question)}</h3>
+            <div class="options">
+                ${question.options.map((opt, i) => `
+                    <label class="option ${selectedAnswer === opt ? 'selected' : ''}">
+                        <input type="radio" name="answer" value="${i}"
+                            ${selectedAnswer === opt ? 'checked' : ''}>
+                        <span class="letter">${String.fromCharCode(65 + i)}</span>
+                        <span class="text">${this.esc(opt)}</span>
+                        <span class="checkmark">✓</span>
+                    </label>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    getImagePrompt(image) {
+        if (!image) return 'No image description provided.';
+        if (typeof image === 'string') return image;
+        if (typeof image === 'object') {
+            return image.description || image.alt || image.assetId || 'Image available in local assets.';
+        }
+        return String(image);
     }
 
     renderErrorIdentification(question, selectedAnswer) {

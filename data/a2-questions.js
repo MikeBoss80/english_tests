@@ -44,11 +44,11 @@ export const A2_RAW = {
             section: "grammar",
             topic: "present_perfect",
             difficulty: 2,
-            type: "multiple_choice",
-            question: "They ___ already ___ their homework.",
-            options: ["have / finished", "has / finished", "have / finish", "has / finish"],
-            answer: "have / finished",
-            explanation: "Present perfect: have/has + past participle."
+            type: "true_false",
+            question: "True or False: 'They has already finished their homework' is correct English.",
+            options: ["True", "False"],
+            answer: "False",
+            explanation: "With 'they', use 'have', not 'has'."
         },
         {
             id: "A2-GRAM-004",
@@ -488,8 +488,12 @@ export const A2_RAW = {
             section: "vocabulary",
             topic: "travel",
             difficulty: 2,
-            type: "multiple_choice",
-            question: "You need this document to travel to another country.",
+            type: "image_choice",
+            question: "Look at the travel desk scene. Which document is required to travel to another country?",
+            image: {
+                assetId: "a2-airport-checkin",
+                description: "A traveler at an airport check-in counter showing a booklet document to an airline agent."
+            },
             options: ["wallet", "passport", "receipt", "ticket"],
             answer: "passport",
             explanation: "A passport is required to travel abroad."
@@ -918,16 +922,10 @@ export const A2_RAW = {
             section: "language_use",
             topic: "social",
             difficulty: 2,
-            type: "multiple_choice",
-            question: "Your friend looks sick. What do you say?",
-            options: [
-                "You should see a doctor.",
-                "You must go shopping.",
-                "You can sleep here.",
-                "You are sleeping."
-            ],
+            type: "open_answer",
+            question: "Your friend looks sick. Write one short sentence giving advice with 'should'.",
             answer: "You should see a doctor.",
-            explanation: "We give advice with 'should'."
+            explanation: "Use 'should' to give polite advice in social situations."
         },
         {
             id: "A2-LU-002",

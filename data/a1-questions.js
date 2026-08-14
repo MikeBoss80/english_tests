@@ -49,11 +49,11 @@ export const A1_RAW = {
             topic: "verb_to_be",
             subtopic: "present_simple",
             difficulty: 1,
-            type: "multiple_choice",
-            question: "They ___ students.",
-            options: ["am", "is", "are", "be"],
-            answer: "are",
-            explanation: "Use 'are' with plural subjects (they/we/you)"
+            type: "true_false",
+            question: "True or False: In the sentence 'They are students', 'are' is the correct verb.",
+            options: ["True", "False"],
+            answer: "True",
+            explanation: "Use 'are' with plural subjects like they/we/you."
         },
         {
             id: "A1-GRAM-004",
@@ -465,11 +465,15 @@ export const A1_RAW = {
             topic: "personal_info",
             subtopic: "basic",
             difficulty: 1,
-            type: "multiple_choice",
-            question: "What is your first ___?",
+            type: "image_choice",
+            question: "Look at the image context and choose the missing word: 'What is your first ___?'",
+            image: {
+                assetId: "a1-personal-info-form",
+                description: "A simple registration form with fields: First name, Last name, Age, and Country."
+            },
             options: ["name", "number", "address", "age"],
             answer: "name",
-            explanation: "'Name' is what we call someone"
+            explanation: "In personal information forms, 'first name' is the correct phrase."
         },
         {
             id: "A1-VOCAB-002",
@@ -1068,11 +1072,15 @@ export const A1_RAW = {
             topic: "social",
             subtopic: "greetings",
             difficulty: 1,
-            type: "multiple_choice",
-            question: "What do you say when you see someone in the morning?",
+            type: "image_context",
+            question: "Use the scene to choose the best greeting.",
+            image: {
+                assetId: "a1-morning-greeting-scene",
+                description: "Two classmates meeting at the school entrance at 8:00 a.m., both smiling and waving."
+            },
             options: ["Good morning", "Good evening", "Good night", "Good afternoon"],
             answer: "Good morning",
-            explanation: "We say 'Good morning' in the morning"
+            explanation: "The scene happens early in the day, so 'Good morning' is appropriate."
         },
         {
             id: "A1-LANG-002",

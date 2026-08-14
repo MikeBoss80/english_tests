@@ -22,11 +22,11 @@ export const B1_RAW = {
             section: "grammar",
             topic: "past_perfect",
             difficulty: 3,
-            type: "multiple_choice",
-            question: "When I arrived, the meeting had already ___.",
-            options: ["start", "started", "starts", "starting"],
-            answer: "started",
-            explanation: "Past perfect: had + past participle for an action before a past moment."
+            type: "true_false",
+            question: "True or False: 'When I arrived, the meeting had already started' uses past perfect correctly.",
+            options: ["True", "False"],
+            answer: "True",
+            explanation: "Past perfect (had started) marks the action completed before another past action."
         },
         {
             id: "B1-GRAM-002",
@@ -482,8 +482,12 @@ export const B1_RAW = {
             section: "vocabulary",
             topic: "idioms",
             difficulty: 3,
-            type: "multiple_choice",
-            question: "He's not feeling well. He's under the ___.",
+            type: "image_context",
+            question: "Use the image context to complete the idiom: 'He's under the ___.'",
+            image: {
+                assetId: "b1-sick-at-office",
+                description: "An office worker looking pale, wrapped in a blanket, with a thermometer and tissues on the desk."
+            },
             options: ["weather", "table", "rain", "moon"],
             answer: "weather",
             explanation: "'Under the weather' means feeling ill."
@@ -1239,16 +1243,10 @@ export const B1_RAW = {
             section: "language_use",
             topic: "professional",
             difficulty: 3,
-            type: "multiple_choice",
-            question: "You need to reschedule a meeting. You say:",
-            options: [
-                "Could we move the meeting to Friday?",
-                "The meeting moves Friday.",
-                "I move the meeting you.",
-                "Meeting Friday, go."
-            ],
+            type: "open_answer",
+            question: "You need to reschedule a meeting. Write one polite sentence using 'Could we...'.",
             answer: "Could we move the meeting to Friday?",
-            explanation: "Polite requests use 'could we...'."
+            explanation: "Professional requests are clearer and more polite with forms like 'Could we...'."
         },
         {
             id: "B1-LU-002",

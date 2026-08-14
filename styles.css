@@ -725,6 +725,119 @@ body::before {
     margin-top: 14px;
 }
 
+.roadmap-panel,
+.media-panel {
+    margin-top: 28px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    background: var(--bg-secondary);
+    padding: 20px;
+    box-shadow: var(--shadow-md);
+}
+
+.roadmap-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.roadmap-header h3,
+.media-card h4 {
+    color: var(--gray-900);
+    margin-top: 8px;
+}
+
+.roadmap-summary {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.roadmap-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.metric-pill {
+    background: var(--gray-100);
+    border-radius: var(--radius-full);
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+}
+
+.roadmap-grid,
+.media-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.sprint-card,
+.media-card {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 14px 12px;
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--gray-50) 100%);
+    text-align: left;
+}
+
+.sprint-card.done {
+    border-color: rgba(16, 185, 129, 0.4);
+}
+
+.sprint-card.planned {
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.sprint-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.sprint-number {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.sprint-status {
+    font-size: 0.72rem;
+    color: var(--gray-500);
+}
+
+.sprint-card h4 {
+    font-size: 0.95rem;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+}
+
+.sprint-card p,
+.media-card li {
+    color: var(--gray-600);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.media-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.media-card strong {
+    color: var(--gray-900);
+}
+
 /* ============================================================
    Options - Mejoradas
    ============================================================ */
